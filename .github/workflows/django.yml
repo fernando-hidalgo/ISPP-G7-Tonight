@@ -1,0 +1,52 @@
+name: ToNight
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: toNight
+        ports: ['3306:3306']
+    steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python 3.8
+          uses: actions/setup-python@v2
+          with:
+            python-version: $
+        - name: Install Dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r tonight/requirements.txt
+        - name: Run Migrations
+          run: python tonight/manage.py makemigrations;python tonight/manage.py migrate
+          env: 
+            DBENGINE: django.db.backends.mysql
+            DBNAME: toNight
+            DBUSER: root
+            DBPASSWORD: password
+            DBHOST: 127.0.0.1
+            DBPORT: $
+        - name: Run Tests
+          run: |
+            python manage.py test tonight/proyecto/tests.py
+          env: 
+            DBENGINE: django.db.backends.mysql
+            DBNAME: toNight
+            DBUSER: root
+            DBPASSWORD: password
+            DBHOST: 127.0.0.1
+            DBPORT: $
