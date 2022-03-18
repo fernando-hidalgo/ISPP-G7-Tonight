@@ -1,5 +1,6 @@
 wheel
 mysqlclient
+PyMySql
 Pillow
 django
 
