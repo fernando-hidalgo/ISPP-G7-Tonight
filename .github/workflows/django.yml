@@ -39,10 +39,10 @@ jobs:
             DBUSER: root
             DBPASSWORD: password
             DBHOST: 127.0.0.1
-            DBPORT: $
+            DBPORT: 3306
         - name: Run Tests
           run: |
-            python tonight/manage.py test tonight/proyecto/tests.py
+            python tonight/manage.py test
           env: 
             DBENGINE: django.db.backends.mysql
             DBNAME: toNight
