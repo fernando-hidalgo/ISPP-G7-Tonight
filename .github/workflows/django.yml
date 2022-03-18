@@ -49,4 +49,4 @@ jobs:
             DBUSER: root
             DBPASSWORD: password
             DBHOST: 127.0.0.1
-            DBPORT: $
+            DBPORT: 3306
