@@ -1,21 +1,12 @@
 import datetime
 from django.shortcuts import render, get_object_or_404
 import qrcode
-import hashlib
-import binascii
-import hmac
 import cv2
 from proyecto.models import *
 # Create your views here.
 key_event = "FFFF"
 path = 'static/img/qrcode001.png'
 #TICKET QRS
-def generate_hash(key, msg):
-    key = binascii.unhexlify(key)
-    encoded = msg.encode()
-    result = hmac.new(key, encoded, hashlib.sha256).hexdigest()
-    return result
-    
 def generate_qr(cliente, entrada, evento):
     """Datos a meter en el qr: 
     - Usuario (nombre)
@@ -38,11 +29,24 @@ def generate_qr(cliente, entrada, evento):
     img = qr.make_image(fill='black', back_color='white')
     img.save(path)
 
-def get_data():
-    filename = path
-    image = cv2.imread(filename)
+def read_qr_cam():
+    cap = cv2.VideoCapture(0)
     detector = cv2.QRCodeDetector()
-    data, vertices_array, binary_qrcode = detector.detectAndDecode(image)
+    while True:
+        _, img = cap.read()
+        data, vertices_array, _ = detector.detectAndDecode(img)
+        if vertices_array is not None:
+            if data:
+                cv2.imshow("img", img)
+                if cv2.waitKey(1) == ord("q"):
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    print(data)
+                    return data
+
+def get_data(img):
+    detector = cv2.QRCodeDetector()
+    data, vertices_array, binary_qrcode = detector.detectAndDecode(img)
     if vertices_array is not None:
         print(data)
         return data
@@ -52,14 +56,18 @@ def get_data():
 def verify_qr(data, evento):
     if len(data.split(',')) == 2:
         name_event, qr_hash = data.split(',')
-        entradas = [entrada.hash for entrada in Entrada.objects.all().filter(evento=evento.id)]
+        entradas = Entrada.objects.all().filter(evento=evento.id)
         print("Entradas: ", entradas)
-        if qr_hash in entradas:
-            print(name_event, qr_hash)
-            print("Okay")
+        for entrada in entradas:
+            if entrada.hash == qr_hash:
+                print("Okay")
+                return entrada
     else:
         print("Invalid QR")
+    return None
 
+
+"""
 def create_events_test():
     user = User.objects.create(username="u_piloto1", password="pass_prueba1")
     empresa = Empresa.objects.create(user=user, tlf=656565656)
@@ -94,3 +102,4 @@ def qr_init():
     generate_qr(cliente, entrada, evento)
     data = get_data()
     verify_qr(data, evento)
+"""

@@ -20,5 +20,6 @@ from proyecto import views
 urlpatterns = [
     path('', views.index),
     path('qr', views.QR),
+    path('scan', views.scan),
     path('admin/', admin.site.urls),
 ]
