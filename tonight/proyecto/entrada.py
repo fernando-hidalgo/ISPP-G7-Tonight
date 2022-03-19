@@ -4,7 +4,6 @@ from proyecto.models import *
 import hashlib
 import binascii
 import hmac
-import qr
 from proyecto.qr import *
 
 def generate_hash(key, msg):
@@ -23,14 +22,13 @@ def create_entrada(cliente, evento):
     )
     return entrada
 
-def exchange_entrada(img_qr, evento):
+def exchange_entrada(data, evento):
     """LLamamos a la la función de leer qr del qr.py y en caso de verificarse
     que dicha entrada es valida y esta activa, se pasa a estado vendida y devuelve un okay"""
-    
-    data = get_data(img_qr)
     entrada = verify_qr(data, evento)
     if entrada is not None:
         if entrada.estado == 1:
             entrada.estado = 3
             return True
+    print("No se ha encontrado una entrada")
     return False
