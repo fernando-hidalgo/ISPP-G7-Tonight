@@ -3,4 +3,4 @@ mysqlclient
 PyMySql
 Pillow
 django
-
+gunicorn

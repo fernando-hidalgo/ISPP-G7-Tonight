@@ -50,3 +50,19 @@ jobs:
             DBPASSWORD: password
             DBHOST: 127.0.0.1
             DBPORT: 3306
+  release:
+  runs-on: ubuntu-latest
+  steps:
+  - uses: actions/checkout@master
+    with:
+      fetch-depth: 0
+  - name: login
+    uses: actions/heroku@master
+    env:
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+    with:
+      args: container:login
+  - name: set remote
+    run: git remote set-url origin https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/to-night.git
+  - name: push and deploy
+    run: git push origin HEAD:master -f
