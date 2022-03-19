@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 import qrcode
 import cv2
 from proyecto.models import *
+from proyecto.entrada import generate_hash
 # Create your views here.
 key_event = "FFFF"
 path = 'static/img/qrcode001.png'
@@ -67,7 +68,6 @@ def verify_qr(data, evento):
     return None
 
 
-"""
 def create_events_test():
     user = User.objects.create(username="u_piloto1", password="pass_prueba1")
     empresa = Empresa.objects.create(user=user, tlf=656565656)
@@ -86,7 +86,7 @@ def create_events_test():
     print(entrada)
     return cliente, evento, entrada
 
-def qr_init():
+def init_qr():
     User.objects.all().delete()
     Evento.objects.all().delete()
     Empresa.objects.all().delete()
@@ -99,7 +99,3 @@ def qr_init():
     for e in Entrada.objects.all():
         print(e.hash)
 
-    generate_qr(cliente, entrada, evento)
-    data = get_data()
-    verify_qr(data, evento)
-"""
