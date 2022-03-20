@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Perfil Empresa</title>
+    </head>
+    <body>
+            <table style=”text-align:center”>
+                    <tr>
+                        <td>Nombre:</td>
+                        <td> {{ empresa.user.username }} </td>
+                    </tr>
+                    <tr>
+                        <td>Email:</td>
+                        <td> {{ empresa.user.email }} </td>
+                    </tr>
+                    <tr>
+                        <td>Foto:</td>
+                        <td>
+                            <img src="/media/{{ empresa.imagen }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Teléfono:</td>
+                        <td> {{ empresa.tlf }} </td>
+                    </tr>
+            </table>
+            <a href="/logOut/">Logout</a>
+    </body>
+</html>
