@@ -20,4 +20,9 @@ from proyecto import views
 urlpatterns = [
     path('', views.index),
     path('admin/', admin.site.urls),
+    path('eventos/', views.listar_eventos),
+    path('eventos/<int:evento_id>', views.ver_evento),
+    path('eventos/<int:evento_id>/borrar', views.borrar_evento),
+    path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
+    path('eventos/crear', views.VistaCrearEvento.as_view()),
 ]

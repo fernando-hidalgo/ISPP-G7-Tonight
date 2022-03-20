@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{evento.nombre}}</title>
+</head>
+<body>
+  
+    
+    <div class="detalles_evento">
+
+        <h1>Lista de eventos</h1>
+
+        {% if x.imagen == '' %}
+        {% else %}
+        <img src="{{evento.imagen}}" alt="{{evento.imagen}}"/><br><br>
+        {% endif %}
+            {{evento.nombre}} {{evento.fecha|date:"d/m/Y" }} {{evento.precioEntrada}}€ <br>
+            total de entradas: {{evento.totalEntradas}}<br>
+            {{evento.descripcion}}<br>
+            Ubicación: {{evento.ubicacion}}<br><br>
+        <form id="boton_borrar" action="{{evento.id}}/delete">
+            <input type="submit" value="Eliminar evento" />
+        </form>
+
+        <form id="boton_editar" action="{{evento.id}}/editar">
+            <input type="submit" value="Editar evento" />
+        </form>
+    </div>
+
+</body>
+</html>
