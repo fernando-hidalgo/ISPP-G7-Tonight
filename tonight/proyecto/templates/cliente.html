@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Perfil</title>
+    </head>
+    <body>
+            <table style=”text-align:center”>
+                    <tr>
+                        <td>Nombre:</td>
+                        <td> {{ cliente.user.username }} </td>
+                    </tr>
+                    <tr>
+                        <td>Foto:</td>
+                        <td>
+                            <img src="/media/{{ cliente.imagen }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>E-mail:</td>
+                        <td> {{ cliente.user.email }} </td>
+                    </tr>
+                    <tr>
+                        <td>Teléfono:</td>
+                        <td> {{ cliente.tlf }} </td>
+                    </tr>
+                    <tr>
+                        <td>Saldo:</td>
+                        <td> {{ cliente.saldo }} </td>
+                    </tr>
+            </table>
+    </body>
+</html>

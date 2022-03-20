@@ -16,8 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from proyecto import views
+from django.contrib.auth.views import LoginView
+from proyecto.cliente.views import ClienteVista, Vista
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('', views.index),
     path('admin/', admin.site.urls),
+    path('index/', Vista.as_view()),
+    path('cliente/<id>/', ClienteVista.as_view()),
+    path('logInCliente/', LoginView.as_view(template_name='registroCliente.html'))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -7,12 +7,12 @@ class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
     saldo = models.PositiveIntegerField()
     tlf = models.PositiveIntegerField()
-    imagen = models.ImageField(blank=True)
+    imagen = models.ImageField(blank=True, upload_to='media/')
 
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
     tlf = models.PositiveIntegerField()
-    imagen = models.ImageField(blank=True)
+    imagen = models.ImageField(blank=True, upload_to='media/')
 
 class Empleado(models.Model):
     user = models.OneToOneField(User, related_name='user_epld', on_delete=models.CASCADE)
@@ -26,7 +26,7 @@ class Evento(models.Model):
     ubicacion = models.CharField(max_length=100)
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
-    imagen = models.ImageField(blank=True)
+    imagen = models.ImageField(blank=True, upload_to='media/')
 
 class Entrada(models.Model):
     fechaCompra = models.DateTimeField()
