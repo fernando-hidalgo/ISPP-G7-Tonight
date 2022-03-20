@@ -1,0 +1,26 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos</title>
+</head>
+<body>
+  
+    
+    <div class="lista_de_eventos">
+
+        <h1>Lista de eventos</h1>
+
+        {% for x in eventos %}
+
+        <img src="{{x.imagen.url}}" alt="{{x.imagen.url}}"/><br><br>
+
+            {{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}}€ <br><br>
+
+        {%endfor%}
+
+    </div>
+
+</body>
+</html>

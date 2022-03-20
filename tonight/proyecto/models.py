@@ -1,3 +1,4 @@
+from distutils.command.upload import upload
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -20,13 +21,14 @@ class Empleado(models.Model):
 
 class Evento(models.Model):
     fecha = models.DateTimeField()
+    precioEntrada = models.PositiveIntegerField()
     totalEntradas = models.PositiveIntegerField()
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     ubicacion = models.CharField(max_length=100)
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
-    imagen = models.ImageField(blank=True)
+    imagen = models.ImageField(blank=True,upload_to='imagenes_eventos/')
 
 class Entrada(models.Model):
     fechaCompra = models.DateTimeField()
