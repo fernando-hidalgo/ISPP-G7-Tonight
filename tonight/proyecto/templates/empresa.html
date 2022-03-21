@@ -23,6 +23,13 @@
                         <td> {{ empresa.tlf }} </td>
                     </tr>
             </table>
+            {% for x in eventos %}
+
+            <img src="/media/{{ x.imagen }}"/><br><br>
+
+                {{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}} <br><br>
+
+            {%endfor%}
             <a href="/logOut/">Logout</a>
     </body>
 </html>
