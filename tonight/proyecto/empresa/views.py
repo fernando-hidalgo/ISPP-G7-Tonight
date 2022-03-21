@@ -40,8 +40,10 @@ class EmpresaVista(View):
             return response
         else:
             empresa = Empresa.objects.get(user=usuario)
+            eventos = Evento.objects.filter(empresa=empresa)
             context = {
-                'empresa': empresa
+                'empresa': empresa,
+                'eventos': eventos
             }
         
             return render (request, 'empresa.html', context)
