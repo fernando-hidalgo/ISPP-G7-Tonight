@@ -1,42 +1,26 @@
-"""tonight URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
-from proyecto.cliente.views import ClienteVista, Vista
-from proyecto.empresa.views import EmpresaVista, Vista2
+from proyecto.views import ClienteVista, Vista
+from proyecto.views import EmpresaVista, Vista2
 from proyecto.views import InicioVista, ErrorVista
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
-    path('', views.index),
+    path('', LoginView.as_view(template_name='login.html')),
     path('admin/', admin.site.urls),
-    path('index/', Vista.as_view()),
-    path('index2/', Vista2.as_view()),
+    path('welcome_client/', Vista.as_view()),
+    path('welcome_bussines/', Vista2.as_view()),
     path('inicio/', InicioVista.as_view()),
     path('cliente/<id>/', ClienteVista.as_view()),
     path('empresa/<id>/', EmpresaVista.as_view()),
     path('cliente/', ErrorVista.as_view()),
     path('empresa/', ErrorVista.as_view()),
     path('error/', ErrorVista.as_view()),
-    path('logIn/', LoginView.as_view(template_name='login.html')),
-    path('logOut/', LogoutView.as_view())
+    path('login/', LoginView.as_view(template_name='login.html')),
+    path('logout/', LogoutView.as_view())
 ]
 
 if settings.DEBUG:

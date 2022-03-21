@@ -140,6 +140,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_REDIRECT_URL = '/inicio/'
-LOGOUT_REDIRECT_URL = '/logIn/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 APPEND_SLASH=False
