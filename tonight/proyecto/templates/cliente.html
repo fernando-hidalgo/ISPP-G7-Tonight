@@ -27,6 +27,26 @@
                         <td> {{ cliente.saldo }} </td>
                     </tr>
             </table>
+            <table style=”text-align:center”>
+            {% for x in entradas %}
+                <tr>
+                    <td> {{ x.evento.nombre }}</td>
+                    {% if x.estado == 'A' %}
+                    <td> Adquirida </td>
+                    {% elif x.estado == 'E' %}
+                    <td> En venta </td>
+                    {% elif x.estado == 'V' %}
+                    <td> Vendida </td>
+                    {% elif x.estado == 'U' %}
+                    <td> Usada </td>
+                    {% elif x.estado == 'C' %}
+                    <td> Caducada </td>
+                    {%endif%}
+                    <td><a href="#"><input type="button" value="Ver"></a></td>
+                </tr>
+            </table>
+            {%endfor%}
+            <br>
             <a href="/logout/">Logout</a>
             <a href="/welcome_client/">Atrás</a>
     </body>

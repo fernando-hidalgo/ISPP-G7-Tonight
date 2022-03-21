@@ -24,11 +24,12 @@
                     </tr>
             </table>
             {% for x in eventos %}
-
-            <img src="/media/{{ x.imagen }}"/><br><br>
-
-                {{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}} <br><br>
-
+            <table style=”text-align:center”>
+                <tr>
+                    <td>{{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}}</td>
+                    <td><a href="#"><input type="button" value="Ver"></a></td>
+                </tr>
+            </table>
             {%endfor%}
             <a href="/logout/">Logout</a>
             <a href="/welcome_bussines/">Atrás</a>
