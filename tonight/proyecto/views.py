@@ -157,12 +157,32 @@ class BusinnessProfile(View):
             return response
 
 def ver_evento(request, evento_id): 
-    evento = Evento.objects.get(id=evento_id)
-    return render(request,'detalles_evento.html', {"evento":evento})
+    hay_evento = Evento.objects.filter(id=evento_id).exists()
+    if hay_evento == True:
+
+        evento = Evento.objects.get(id=evento_id)
+        return render(request,'detalles_evento.html', {"evento":evento})
+
+    else:
+        response = redirect('/error/')
+        return response
+
 def borrar_evento(request, evento_id):
-    Evento.objects.filter(pk=evento_id).delete()
-    eventos = Evento.objects.all()
-    return redirect('/eventos/')
+
+    if request.user.id == None:
+            response = redirect('/error/')
+            return response
+
+    hay_evento = Evento.objects.filter(id=evento_id).exists()
+    if hay_evento == True:
+    
+        Evento.objects.filter(pk=evento_id).delete()
+        eventos = Evento.objects.all()
+        return redirect('/eventos/')
+
+    else:
+        response = redirect('/error/')
+        return response
 
 class VistaEditarEvento(UpdateView):
     # specify the model you want to use
@@ -171,6 +191,7 @@ class VistaEditarEvento(UpdateView):
     # specify the fields
     fields = [
         "fecha",
+        "precioEntrada",
         "totalEntradas",
         "nombre",
         "descripcion",
@@ -186,6 +207,7 @@ class VistaCrearEvento(CreateView):
     # specify the fields
     fields = [
         "fecha",
+        "precioEntrada",
         "totalEntradas",
         "nombre",
         "descripcion",

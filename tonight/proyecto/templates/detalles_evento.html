@@ -14,7 +14,7 @@
 
         {% if x.imagen == '' %}
         {% else %}
-        <img src="{{evento.imagen.url}}" alt="{{evento.imagen.url}}"/><br><br>
+        <img src="/media/{{ evento.imagen }}"/><br><br>
         {% endif %}
             {{evento.nombre}} {{evento.fecha|date:"d/m/Y H:i" }} {{evento.entrada.precioEntrada}}€ <br>
             total de entradas: {{evento.totalEntradas}}<br>

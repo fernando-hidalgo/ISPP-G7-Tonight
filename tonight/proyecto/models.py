@@ -23,7 +23,7 @@ class Empleado(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
 class Evento(models.Model):
-    fecha = models.DateTimeField()
+    fecha = models.DateTimeField("YYYY-MM-DD HH:mm",validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
     precioEntrada = models.PositiveIntegerField()
     totalEntradas = models.PositiveIntegerField()
     nombre = models.CharField(max_length=100)
