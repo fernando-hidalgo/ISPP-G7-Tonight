@@ -25,7 +25,7 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
-                response = redirect('/welcome_bussines/')
+                response = redirect('/welcome_bussiness/')
                 return response
             if cliente_exists:
                 response = redirect('/welcome_client/')
@@ -37,7 +37,7 @@ class InicioVista(View):
 class ErrorVista(TemplateView):
     template_name = 'error.html'
 
-class Vista(View):
+class WelcomeClient(View):
     
     def get(self, request):
 
@@ -63,7 +63,7 @@ class Vista(View):
             response = redirect('/error/')
             return response
 
-class ClienteVista(View):
+class ClientProfile(View):
     
     def get(self, request, id):
         
@@ -95,7 +95,7 @@ class ClienteVista(View):
             response = redirect('/error/')
             return response
         
-class Vista2(View):
+class WelcomeBusiness(View):
     
     def get(self, request):
 
@@ -110,14 +110,14 @@ class Vista2(View):
                 response = redirect('/error/')
                 return response
             else:
-                return render (request, 'welcome_bussines.html')
+                return render (request, 'welcome_bussiness.html')
         else:
             response = redirect('/error/')
             return response
         
         
 
-class EmpresaVista(View):
+class BusinnessProfile(View):
     
     def get(self, request, id):
         
