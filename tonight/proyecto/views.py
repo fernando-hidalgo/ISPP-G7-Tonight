@@ -14,7 +14,7 @@ User = get_user_model()
 
 # Create your views here.
 def listar_eventos(request): 
-    eventos = Evento.objects.all()  
+    eventos = Evento.objects.all()
     return render(request,'listar_eventos.html', {"eventos":eventos})
 
 class InicioVista(View):

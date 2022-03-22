@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    path('', LoginView.as_view(template_name='login.html')),
     path('eventos/', views.listar_eventos),
     path('admin/', admin.site.urls),
     path('welcome_client/', WelcomeClient.as_view()),

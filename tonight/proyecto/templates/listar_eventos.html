@@ -1,26 +1,77 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventos</title>
-</head>
-<body>
-  
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1./js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
     
-    <div class="lista_de_eventos">
+    <style>
+        .party-list-card-title{
+            margin-top: 1%;
+            background-color: #4C49FA;
+            border-radius: 8px;
+            font-size: 5vw;
+            width: max-content;
+        }
+    </style>
 
-        <h1>Lista de eventos</h1>
+    <title>Lista de fiestas</title>
+  </head>
+  <body>
+    <section class="container">
+      <div class="row">
+        <div class="col-3">
+          <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/welcome_client/'">
+            <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+          </button>
+        </div>
 
-        {% for x in eventos %}
+        <div class="col-6">
+          <img src="/media/media/Logo.png" alt="Logo" class="img-fluid"/>
+        </div>
+      
+        <div class="col-3">
+          <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/cliente/{{ user.id }}/'">
+            <i class="bi bi-person-circle" style="font-size: 4rem; color: #A017E0;"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+        
+    {% for x in eventos %}
+        <section class="container party-list-card text-white" style="margin-top: 5%;">
+          <div class="row" >
+            <div class="container party-list-card-title text-white">
+              <p>{{x.nombre}}</p>
+            </div>
+          </div>
 
-        <img src="{{x.imagen.url}}" alt="{{x.imagen.url}}"/><br><br>
+          <div class="row" >
+            <img src="{{x.imagen.url}}" alt="fiesta" class="party-list-img"/>
+          </div>
 
-            {{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}}€ <br><br>
+          <div class="row" >
+            <div class="column" style= "width: 60%;">
+              <div class="container party-infobox text-white">
+                <p>{{x.fecha|date:"d/m/Y" }}</p>
+              </div>
+            </div>
+        
+            <div class="column" style= "width: 40%;">
+              <div class="container party-infobox text-white">
+                <p>{{x.precioEntrada}}€</p>
+              </div>
+            </div>
+          </div>
+        </section>
+    {%endfor%}
 
-        {%endfor%}
-
-    </div>
-
-</body>
+  </body>
 </html>
