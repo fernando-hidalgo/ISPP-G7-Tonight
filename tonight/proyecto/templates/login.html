@@ -1,0 +1,18 @@
+{% block navbar%}
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="form-signin">
+    {% csrf_token %}
+    <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+    <label for="id_username" class="sr-only">Usuario</label>
+    <input type="text" id="id_username" class="form-control" placeholder="Usuario" name="username" required autofocus>
+    <label for="id_password" class="sr-only">Contraseña</label>
+    <input type="password" id="id_password" class="form-control" placeholder="Contraseña" name="password" required>
+    <div class="checkbox mb-3"></div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+    
+    {% if form.errors %}
+        <p>Su usuario y/o contraseña son incorrectos.</p>
+    {% endif %}
+{% endblock %}
