@@ -16,8 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from proyecto import views
+from tonight.proyecto import compra_venta
 
 urlpatterns = [
     path('', views.index),
     path('admin/', admin.site.urls),
+    path('eventos/eventos_id/comprar', compra_venta.conprarEntradas),
+    #añadir ruta boton
+    path('', compra_venta.venderEntradas),
+    path('', compra_venta.cancelarVentaEntrada)
 ]
