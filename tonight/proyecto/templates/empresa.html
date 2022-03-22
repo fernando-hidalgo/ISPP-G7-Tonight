@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <title>Perfil Empresa</title>
+    </head>
+    <body>
+            <table style=”text-align:center”>
+                    <tr>
+                        <td>Nombre:</td>
+                        <td> {{ empresa.user.username }} </td>
+                    </tr>
+                    <tr>
+                        <td>Email:</td>
+                        <td> {{ empresa.user.email }} </td>
+                    </tr>
+                    <tr>
+                        <td>Foto:</td>
+                        <td>
+                            <img src="/media/{{ empresa.imagen }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Teléfono:</td>
+                        <td> {{ empresa.tlf }} </td>
+                    </tr>
+            </table>
+            {% for x in eventos %}
+            <table style=”text-align:center”>
+                <tr>
+                    <td>{{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}}</td>
+                    <td><a href="#"><input type="button" value="Ver"></a></td>
+                </tr>
+            </table>
+            {%endfor%}
+            <a href="/logout/">Logout</a>
+            <a href="/welcome_bussiness/">Atrás</a>
+    </body>
+</html>

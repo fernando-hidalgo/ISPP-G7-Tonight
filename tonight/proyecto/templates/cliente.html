@@ -1,0 +1,97 @@
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+  </head>
+
+  <title>Tonight</title>
+
+  <body>
+    <section class="container">
+      <div class="row">
+        <div class="col-3">
+          <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/welcome_client/'">
+            <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+          </button>
+        </div>
+
+        <div class="col-6">
+          <img src="/media/media/Logo.png" alt="Logo" class="img-fluid"/>
+        </div>
+      
+        <div class="col-3">
+          <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/logout/'">
+            <i class="bi bi-backspace-reverse-fill" style="font-size: 4rem; color: #A017E0;"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="row">
+        <img src="/media/{{ cliente.imagen }}" alt="Profile Pic" class="img-party">
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="row" style= "margin-top: 3%;">
+        <div class="column" style= "width: 58%;">
+            <div class="container party-infobox text-white">
+              <p>Nombre: {{ cliente.user.username }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Correo: {{ cliente.user.email }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Teléfono: {{ cliente.tlf }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Saldo: {{ cliente.saldo }}</p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container profile-tickets-list-card">
+        {% for x in entradas %}
+            <div class="row">
+                <div class="column" style= "width: 20%;">
+                    <p > {{ x.evento.nombre }} </p>
+                </div>
+
+                <div class="column" style= "width: 35%;">
+                    {% if x.estado == 'A' %}
+                    <p> Adquirida </p>
+                    {% elif x.estado == 'E' %}
+                    <p> En venta </p>
+                    {% elif x.estado == 'V' %}
+                    <p> Vendida </p>
+                    {% elif x.estado == 'U' %}
+                    <p> Usada </p>
+                    {% elif x.estado == 'C' %}
+                    <p> Caducada </p>
+                    {%endif%}
+                </div>
+
+                <div class="column" style= "width: 45%;">
+                    <a href="#"><input type="button" class="see-ticket-button text-white" value="Ver"></a>
+                </div>
+
+                <hr class="divider" style="height: 3px;">
+            </div>
+            
+        {%endfor%}
+    </section>
+
+  </body>
+</html>
