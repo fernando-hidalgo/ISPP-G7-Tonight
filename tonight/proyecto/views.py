@@ -16,9 +16,7 @@ def borrar_evento(request, evento_id):
     Evento.objects.filter(pk=evento_id).delete()
     eventos = Evento.objects.all()
     return redirect('/eventos/')
-def editar_evento(request, evento_id):
-    evento = Evento.objects.get(id=evento_id)  
-    return render(request,'editar_evento.html', {"evento":evento})
+
 class VistaEditarEvento(UpdateView):
     # specify the model you want to use
     model = Evento
@@ -33,6 +31,7 @@ class VistaEditarEvento(UpdateView):
         "imagen",
     ]
     success_url ="/eventos/"
+
 class VistaCrearEvento(CreateView):
     # specify the model you want to use
     model = Evento

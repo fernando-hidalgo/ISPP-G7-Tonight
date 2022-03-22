@@ -7,16 +7,16 @@
 </head>
 <body>
   
+   
+    <h1>Lista de eventos</h1> 
     
-    <div class="lista_de_eventos">
-
-        <h1>Lista de eventos</h1>
 
         {% for x in eventos %}
+        <a href="/eventos/{{x.id}}" class="evento" style={display:"block"}>
 
         {% if x.imagen == '' %}
         {% else %}
-        <img src="{{x.imagen.url}}" alt="{{x.imagen.url}}"/><br><br>
+        <img src="{{x.imagen.url}}" alt="{{x.imagen.url}}" width="20%" height="20%"/><br><br>
         {% endif %}
             {{x.nombre}} {{x.fecha|date:"d/m/Y" }} {{x.precioEntrada}}€ <br><br>
 
@@ -25,7 +25,7 @@
         <form id="boton_crear" action="crear">
             <input type="submit" value="Crear evento" />
         </form>
-    </div>
+    </a>
 
 </body>
 </html>
