@@ -12,7 +12,7 @@
 
         <h1>Evento:</h1>
 
-        {% if x.imagen == '' %}
+        {% if evento.imagen == '' %}
         {% else %}
         <img src="/media/{{ evento.imagen }}"/><br><br>
         {% endif %}
@@ -20,16 +20,20 @@
             total de entradas: {{evento.totalEntradas}}<br>
             {{evento.descripcion}}<br>
             Ubicación: {{evento.ubicacion}}<br><br>
-        <form id="boton_borrar" action="{{evento.id}}/borrar">
-            <input type="submit" value="Eliminar evento" />
-        </form>
+            {% if es_duenho %}
+                <form id="boton_borrar" action="{{evento.id}}/borrar">
+                    <input type="submit" value="Eliminar evento" />
+                </form>
+                <form id="boton_editar" action="{{evento.id}}/editar">
+                    <input type="submit" value="Editar evento" />
+                </form>
+            {% elif no_duenho %}
+                <form id="boton_comprar" action="{{evento.id}}/comprar">
+                    <input type="submit" value="Comprar entradas" />
+                </form>
+            {% endif %}
 
-        <form id="boton_editar" action="{{evento.id}}/editar">
-            <input type="submit" value="Editar evento" />
-        </form>
-        <form id="boton_comprar" action="{{evento.id}}/comprar">
-            <input type="submit" value="Comprar entradas" />
-        </form>
+
     </div>
 
 </body>

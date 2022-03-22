@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model
@@ -157,11 +158,29 @@ class BusinnessProfile(View):
             return response
 
 def ver_evento(request, evento_id): 
+    no_log = True
+    no_duenho = False
+    es_duenho = False
     hay_evento = Evento.objects.filter(id=evento_id).exists()
+    print(request.user)
     if hay_evento == True:
+        if request.user.id==None:
+            evento = Evento.objects.get(id=evento_id)
+            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
 
-        evento = Evento.objects.get(id=evento_id)
-        return render(request,'detalles_evento.html', {"evento":evento})
+
+        else:
+            usuario = User.objects.get(id=request.user.id)
+            empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
+            cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            if cliente_exists:
+                no_duenho = True
+                evento = Evento.objects.get(id=evento_id)
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
+            elif empresa_exists:
+                evento = Evento.objects.get(id=evento_id)
+                es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
 
     else:
         response = redirect('/error/')
@@ -178,7 +197,7 @@ def borrar_evento(request, evento_id):
     
         Evento.objects.filter(pk=evento_id).delete()
         eventos = Evento.objects.all()
-        return redirect('/eventos/')
+        return redirect('/empresa/'+str(request.user.id)+'/')
 
     else:
         response = redirect('/error/')
@@ -198,7 +217,7 @@ class VistaEditarEvento(UpdateView):
         "ubicacion",
         "imagen",
     ]
-    success_url ="/eventos/"
+    success_url ="/welcome_bussiness/"
 
 class VistaCrearEvento(CreateView):
     # specify the model you want to use
@@ -216,4 +235,4 @@ class VistaCrearEvento(CreateView):
         "empresa",
         "salt",
     ]
-    success_url ="/eventos/"
+    success_url ="/welcome_bussiness/"
