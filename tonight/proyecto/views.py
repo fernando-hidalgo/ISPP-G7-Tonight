@@ -222,6 +222,7 @@ class VistaEditarEvento(UpdateView):
 class VistaCrearEvento(CreateView):
     # specify the model you want to use
     model = Evento
+    success_url ="/welcome_bussiness/"
     template_name="crear_evento.html"
     # specify the fields
     fields = [
@@ -232,7 +233,8 @@ class VistaCrearEvento(CreateView):
         "descripcion",
         "ubicacion",
         "imagen",
-        "empresa",
         "salt",
     ]
-    success_url ="/welcome_bussiness/"
+    def form_valid(self, form):
+        form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        return super().form_valid(form)
