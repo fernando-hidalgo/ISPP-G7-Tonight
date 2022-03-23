@@ -1,0 +1,8 @@
+{% for x in eventos %}
+<form method="POST" class="form-signin">
+    {% csrf_token %}
+    <h1 class="h3 mb-3 font-weight-normal">{{x.nombre}}</h1>
+    <input type="text" id="id" class="form-control" name="id" value="{{x.id}}" required hidden readonly>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Buy ticket</button>
+</form>
+{%endfor%}

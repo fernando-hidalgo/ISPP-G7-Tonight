@@ -9,6 +9,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
+import proyecto.evento
 
 User = get_user_model()
 
@@ -16,6 +17,15 @@ User = get_user_model()
 def listar_eventos(request): 
     eventos = Evento.objects.all()
     return render(request,'listar_eventos.html', {"eventos":eventos})
+
+def comprar_vender(request):
+    eventos = Evento.objects.all()
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        o_evento = Evento.objects.get(id=id)
+        o_user = User.objects.get(id=request.user.id)
+        proyecto.evento.buy_ticket(o_user, o_evento)
+    return render(request,'buy_sell_tickets.html', {"eventos":eventos})
 
 class InicioVista(View):
     def get(self, request):

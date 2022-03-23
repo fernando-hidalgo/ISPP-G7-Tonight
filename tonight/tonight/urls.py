@@ -19,7 +19,8 @@ urlpatterns = [
     path('empresa/', ErrorVista.as_view()),
     path('error/', ErrorVista.as_view()),
     path('login/', LoginView.as_view(template_name='login.html')),
-    path('logout/', LogoutView.as_view())
+    path('logout/', LogoutView.as_view()),
+    path('comprar_vender/', views.comprar_vender)
 ]
 
 if settings.DEBUG:
