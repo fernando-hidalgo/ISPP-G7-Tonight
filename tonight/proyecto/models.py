@@ -1,8 +1,11 @@
 from distutils.command.upload import upload
 from pyexpat import model
 from django.db import models
+from django.core.validators import MinValueValidator
+from django.utils import timezone
 from django.contrib.auth.models import User
 
+import datetime
 # Create your models here.
 
 class Cliente(models.Model):
@@ -21,11 +24,11 @@ class Empleado(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
 class Evento(models.Model):
-    fecha = models.DateTimeField()
+    fecha = models.DateTimeField("YYYY-MM-DD HH:mm",validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
     precioEntrada = models.PositiveIntegerField()
     totalEntradas = models.PositiveIntegerField()
     nombre = models.CharField(max_length=100)
-    descripcion = models.TextField()
+    descripcion = models.TextField(max_length=500)
     ubicacion = models.CharField(max_length=100)
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')

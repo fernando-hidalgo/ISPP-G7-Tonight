@@ -22,8 +22,15 @@ urlpatterns = [
     #path('entrada/<id>/vender/',Entradas.vender),
     path('login/', LoginView.as_view(template_name='login.html')),
     path('logout/', LogoutView.as_view()),
+
     path('qr', views.QR),
     path('scan', views.scan)
+
+    path('eventos/<int:evento_id>', views.ver_evento),
+    path('eventos/<int:evento_id>/borrar', views.borrar_evento),
+    path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
+    path('eventos/crear', views.VistaCrearEvento.as_view()),
+
 ]
 
 if settings.DEBUG:

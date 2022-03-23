@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model
@@ -9,9 +10,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
+
 import proyecto.qr
 import proyecto.entrada
 #import proyecto.transacciones
+
+from django.shortcuts import redirect, render
+from django.views.generic.edit import UpdateView, CreateView
+from .models import Evento
 
 User = get_user_model()
 
@@ -171,6 +177,7 @@ class BusinnessProfile(View):
             return response
 
 
+
 class Entradas(View):
     def get(self, request, id):
         print(id)
@@ -184,3 +191,86 @@ class Entradas(View):
         #o_user = User.objects.get(id=request.user.id)
         #cliente = Cliente.objects.get(user = o_user)
         #proyecto.transacciones.poner_venta(evento, cliente, fech)
+
+def ver_evento(request, evento_id): 
+    no_log = True
+    no_duenho = False
+    es_duenho = False
+    hay_evento = Evento.objects.filter(id=evento_id).exists()
+    print(request.user)
+    if hay_evento == True:
+        if request.user.id==None:
+            evento = Evento.objects.get(id=evento_id)
+            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
+
+
+        else:
+            usuario = User.objects.get(id=request.user.id)
+            empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
+            cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            if cliente_exists:
+                no_duenho = True
+                evento = Evento.objects.get(id=evento_id)
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
+            elif empresa_exists:
+                evento = Evento.objects.get(id=evento_id)
+                es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
+
+    else:
+        response = redirect('/error/')
+        return response
+
+def borrar_evento(request, evento_id):
+
+    if request.user.id == None:
+            response = redirect('/error/')
+            return response
+
+    hay_evento = Evento.objects.filter(id=evento_id).exists()
+    if hay_evento == True:
+    
+        Evento.objects.filter(pk=evento_id).delete()
+        eventos = Evento.objects.all()
+        return redirect('/empresa/'+str(request.user.id)+'/')
+
+    else:
+        response = redirect('/error/')
+        return response
+
+class VistaEditarEvento(UpdateView):
+    # specify the model you want to use
+    model = Evento
+    template_name="editar_evento.html"
+    # specify the fields
+    fields = [
+        "fecha",
+        "precioEntrada",
+        "totalEntradas",
+        "nombre",
+        "descripcion",
+        "ubicacion",
+        "imagen",
+    ]
+    success_url ="/welcome_bussiness/"
+
+class VistaCrearEvento(CreateView):
+    # specify the model you want to use
+    model = Evento
+    success_url ="/welcome_bussiness/"
+    template_name="crear_evento.html"
+    # specify the fields
+    fields = [
+        "fecha",
+        "precioEntrada",
+        "totalEntradas",
+        "nombre",
+        "descripcion",
+        "ubicacion",
+        "imagen",
+        "salt",
+    ]
+    def form_valid(self, form):
+        form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        return super().form_valid(form)
+
