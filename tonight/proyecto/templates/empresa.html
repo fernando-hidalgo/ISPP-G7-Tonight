@@ -66,21 +66,23 @@
       </div>
     </section>
 
-    <section class="container profile-infobox">
+    <section class="container profile-tickets-list-card">
         {% for x in eventos %}
       <div class="row" style= "margin-top: 3%;">
-        <div class="column" style= "width: 33%;">
+        <div class="column" style= "width: 20%;">
           <p class="profile-text">{{x.nombre}}</p>
         </div>
 
-        <div class="column" style= "width: 33%;">
+        <div class="column" style= "width: 35%;">
           <p class="profile-text">{{x.fecha|date:"d/m/Y" }}</p>
         </div>
+
 
         <div class="container party-infobox text-white">
           <form id="boton_editar" action="/eventos/{{x.id}}">
             <input type="submit" value="Ver detalle" />
           </form>
+
         </div>
 
         <hr class="divider" style="height: 3px;">
