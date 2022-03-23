@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model
-from proyecto.models import Cliente, Empresa, Evento, Entrada
+from proyecto.models import Cliente, Empresa, Evento, Entrada, Transaccion
 from django.contrib.auth.models import User
 import json
 from django.conf import settings
@@ -9,6 +9,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
+import proyecto.qr
+import proyecto.entrada
+#import proyecto.transacciones
 
 User = get_user_model()
 
@@ -16,6 +19,20 @@ User = get_user_model()
 def listar_eventos(request): 
     eventos = Evento.objects.all()
     return render(request,'listar_eventos.html', {"eventos":eventos})
+
+def QR(request):
+    proyecto.qr.init_qr()
+    return render(request,'qr.html')
+
+def scan(request):
+    if request.method == 'POST':
+        print("funciona")
+        data = request.POST.get('hash')
+        evento = Evento.objects.get(id=4)
+        proyecto.entrada.exchange_entrada(data, evento)
+        return HttpResponse(status=200)
+    else:
+        return render(request, 'scan.html')
 
 class InicioVista(View):
     def get(self, request):
@@ -152,3 +169,18 @@ class BusinnessProfile(View):
         else:
             response = redirect('/error/')
             return response
+
+
+class Entradas(View):
+    def get(self, request, id):
+        print(id)
+        entrada = Entrada.objects.get(id=id)
+        if request.method == 'POST':
+            id = request.POST.get('id')
+        print(entrada)
+        return render(request,'entrada.html', {"entrada":entrada})
+
+    #def vender(self, request, id):
+        #o_user = User.objects.get(id=request.user.id)
+        #cliente = Cliente.objects.get(user = o_user)
+        #proyecto.transacciones.poner_venta(evento, cliente, fech)
