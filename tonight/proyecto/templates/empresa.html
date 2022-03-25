@@ -56,12 +56,11 @@
             <div class="container party-infobox text-white">
               <p>Teléfono: {{ empresa.tlf }}</p>
             </div>
-            <div class="container party-infobox text-white">
-              <form id="boton_editar" action="/eventos/crear">
-                <input type="submit" value="Crear evento" />
-              </form>
-            </div>
-            </div>
+        </div>
+      </div>
+      <div class="row" style= "margin-top: 3%;">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/crear'">Crear evento</button> 
         </div>
       </div>
     </section>
@@ -77,12 +76,8 @@
           <p class="profile-text">{{x.fecha|date:"d/m/Y" }}</p>
         </div>
 
-        <div class="column" style= "width: 45%;">
-          <button type="button" class="see-ticket-button text-white">Ver</button> 
-        <div class="container party-infobox text-white">
-          <form id="boton_editar" action="/eventos/{{x.id}}">
-            <input type="submit" value="Ver detalle" />
-          </form>
+        <div class="column" style= "width: 30%;  margin-left: 10%">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/{{ x.id }}'">Ver</button> 
         </div>
 
         <hr class="divider" style="height: 3px;">

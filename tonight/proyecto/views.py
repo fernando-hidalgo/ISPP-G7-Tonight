@@ -45,9 +45,7 @@ class ErrorVista(TemplateView):
     template_name = 'error.html'
 
 class WelcomeClient(View):
-    
     def get(self, request):
-
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -60,20 +58,17 @@ class WelcomeClient(View):
                 return response
             else:
                 cliente = Cliente.objects.get(user=usuario)
-
                 context = {
                     'cliente': cliente
                 }
-            
                 return render (request, 'welcome_client.html')
         else:
             response = redirect('/error/')
             return response
 
 class ClientProfile(View):
-    
     def get(self, request, id):
-        
+
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -103,9 +98,7 @@ class ClientProfile(View):
             return response
         
 class WelcomeBusiness(View):
-    
     def get(self, request):
-
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -125,9 +118,7 @@ class WelcomeBusiness(View):
         
 
 class BusinnessProfile(View):
-    
     def get(self, request, id):
-        
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -151,7 +142,6 @@ class BusinnessProfile(View):
                     context = {
                         'empresa': empresa,
                     }
-            
                 return render (request, 'empresa.html', context)
         else:
             response = redirect('/error/')
@@ -166,9 +156,7 @@ def ver_evento(request, evento_id):
     if hay_evento == True:
         if request.user.id==None:
             evento = Evento.objects.get(id=evento_id)
-            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
-
-
+            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho, })
         else:
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
@@ -176,12 +164,11 @@ def ver_evento(request, evento_id):
             if cliente_exists:
                 no_duenho = True
                 evento = Evento.objects.get(id=evento_id)
-                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"user":usuario})
             elif empresa_exists:
                 evento = Evento.objects.get(id=evento_id)
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
-                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho})
-
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"user":usuario})
     else:
         response = redirect('/error/')
         return response
@@ -194,11 +181,9 @@ def borrar_evento(request, evento_id):
 
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     if hay_evento == True:
-    
         Evento.objects.filter(pk=evento_id).delete()
         eventos = Evento.objects.all()
         return redirect('/empresa/'+str(request.user.id)+'/')
-
     else:
         response = redirect('/error/')
         return response

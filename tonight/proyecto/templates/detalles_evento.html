@@ -1,40 +1,95 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{evento.nombre}}</title>
-</head>
-<body>
-  
-    
-    <div class="detalles_evento">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <h1>Evento:</h1>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+  </head>
 
-        {% if evento.imagen == '' %}
-        {% else %}
-        <img src="/media/{{ evento.imagen }}"/><br><br>
-        {% endif %}
-            {{evento.nombre}} {{evento.fecha|date:"d/m/Y H:i" }} {{evento.entrada.precioEntrada}}€ <br>
-            total de entradas: {{evento.totalEntradas}}<br>
-            {{evento.descripcion}}<br>
-            Ubicación: {{evento.ubicacion}}<br><br>
+  <title>Tonight</title>
+  <body>
+    <section class="container">
+        <div class="row">
+          <div class="col-3">
             {% if es_duenho %}
-                <form id="boton_borrar" action="{{evento.id}}/borrar">
-                    <input type="submit" value="Eliminar evento" />
-                </form>
-                <form id="boton_editar" action="{{evento.id}}/editar">
-                    <input type="submit" value="Editar evento" />
-                </form>
+            <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/welcome_bussiness/'">
+              <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
             {% elif no_duenho %}
-                <form id="boton_comprar" action="{{evento.id}}/comprar">
-                    <input type="submit" value="Comprar entradas" />
-                </form>
+            <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/welcome_client/'">
+                <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
             {% endif %}
+          </div>
+  
+          <div class="col-6">
+            <img src="/media/media/Logo.png" alt="Logo" class="img-fluid"/>
+          </div>
+        
+          <div class="col-3">
+            {% if es_duenho %}
+            <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/empresa/{{ user.id }}/'">
+              <i class="bi bi-person-circle" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% elif no_duenho %}
+            <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/cliente/{{ user.id }}/'">
+              <i class="bi bi-person-circle" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </section>
 
+    <section class="container">
+      <div class="row">
+        <img src="./img/Disco.jpg" alt="Logo" class="img-party"/>
+      </div>
+    </section>
 
-    </div>
+    <section class="container">
+      <div class="row">
+        <h1 class="party-title">{{evento.nombre}}</h1>
+      </div>
 
-</body>
+      <div class="row" style= "margin-top: 3%;">
+        <div class="column" style= "width: 58%;">
+            <div class="container party-infobox text-white">
+              <p>{{evento.fecha|date:"d/m/Y H:i" }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>{{evento.ubicacion}}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>{{evento.entrada.precioEntrada}}€</p>
+            </div>
+        </div>
+
+        <div class="column" style= "width: 35%; margin-left: 7%">
+            {% if es_duenho %}
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/borrar'">
+                    Eliminar</button>
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/editar'">
+                    Editar</button>
+            {% elif no_duenho %}
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/comprar'">
+                    Comprar</button>
+            {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="party-description" rows="4" cols="50">
+        <p>{{evento.descripcion}}</p>
+      </div>
+    </section>
+
+  </body>
 </html>
