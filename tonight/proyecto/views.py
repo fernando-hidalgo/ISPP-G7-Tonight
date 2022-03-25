@@ -68,7 +68,6 @@ class WelcomeClient(View):
 
 class ClientProfile(View):
     def get(self, request, id):
-
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -114,8 +113,6 @@ class WelcomeBusiness(View):
         else:
             response = redirect('/error/')
             return response
-        
-        
 
 class BusinnessProfile(View):
     def get(self, request, id):
@@ -155,8 +152,8 @@ def ver_evento(request, evento_id):
     print(request.user)
     if hay_evento == True:
         if request.user.id==None:
-            evento = Evento.objects.get(id=evento_id)
-            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho, })
+            response = redirect('/error/')
+            return response
         else:
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
@@ -174,11 +171,9 @@ def ver_evento(request, evento_id):
         return response
 
 def borrar_evento(request, evento_id):
-
     if request.user.id == None:
             response = redirect('/error/')
             return response
-
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     if hay_evento == True:
         Evento.objects.filter(pk=evento_id).delete()
