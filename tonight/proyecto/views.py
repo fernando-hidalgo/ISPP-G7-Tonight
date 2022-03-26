@@ -12,6 +12,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
+from .forms import UserForm
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada
@@ -49,10 +50,10 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
-                response = redirect('/welcome_bussiness/')
+                response = redirect('/empresa/'+str(request.user.id)+'/')
                 return response
             if cliente_exists:
-                response = redirect('/welcome_client/')
+                response = redirect('/eventos/')
                 return response
         else:
             response = redirect('/error/')
@@ -60,6 +61,9 @@ class InicioVista(View):
 
 class ErrorVista(TemplateView):
     template_name = 'error.html'
+
+class WelcomeVista(TemplateView):
+    template_name = 'welcome.html'
 
 class WelcomeClient(View):
     def get(self, request):
@@ -112,6 +116,18 @@ class ClientProfile(View):
         else:
             response = redirect('/error/')
             return response
+
+
+class ClientCreate(CreateView):
+     # specify the model you want to use
+    model = User
+    template_name="crear_cliente.html"
+    # specify the fields
+    form_class=UserForm
+    success_url ="/eventos/"
+    def form_valid(self, form):
+        form.instance.saldo = 0
+        return super().form_valid(form)
         
 class WelcomeBusiness(View):
     def get(self, request):
