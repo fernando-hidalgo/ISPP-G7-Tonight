@@ -1,6 +1,6 @@
 import datetime
 from django.shortcuts import render, get_object_or_404
-from proyecto.models import *
+from proyecto.models import Entrada
 import hashlib
 import binascii
 import hmac
@@ -26,9 +26,7 @@ def exchange_entrada(data, evento):
     """LLamamos a la la función de leer qr del qr.py y en caso de verificarse
     que dicha entrada es valida y esta activa, se pasa a estado vendida y devuelve un okay"""
     entrada = proyecto.qr.verify_qr(data, evento)
-    if entrada is not None:
-        if entrada.estado == 1:
-            entrada.estado = 3
+    if entrada is not None and entrada.estado == 1 and entrada.estado == 3:
             print("Entrada leida")
             return True
     print("No se ha encontrado una entrada")

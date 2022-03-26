@@ -2,7 +2,8 @@ import datetime
 from django.shortcuts import render, get_object_or_404
 import qrcode
 import cv2
-from proyecto.models import *
+from proyecto.models import Cliente, Empresa, Evento, Entrada
+from django.contrib.auth.models import User
 from proyecto.entrada import generate_hash
 # Create your views here.
 key_event = "FFFF"
@@ -36,8 +37,7 @@ def read_qr_cam():
     while True:
         _, img = cap.read()
         data, vertices_array, _ = detector.detectAndDecode(img)
-        if vertices_array is not None:
-            if data:
+        if vertices_array is not None and data:
                 cv2.imshow("img", img)
                 if cv2.waitKey(1) == ord("q"):
                     cap.release()
