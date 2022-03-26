@@ -78,8 +78,18 @@
                 <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/editar'">
                     Editar</button>
             {% elif no_duenho %}
+                {% if has_entrada %}
+                  {% if en_venta %}
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/cancelar'">
+                    Cancelar</button>
+                  {% else %}
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/vender'">
+                    Vender</button>
+                  {% endif %}
+                {% else %}
                 <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/comprar'">
-                    Comprar</button>
+                  Comprar</button>
+                {% endif %}
             {% endif %}
         </div>
       </div>

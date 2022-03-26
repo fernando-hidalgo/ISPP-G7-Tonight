@@ -19,13 +19,14 @@ urlpatterns = [
     path('empresa/', ErrorVista.as_view()),
     path('error/', ErrorVista.as_view()),
     path('entrada/<id>/',Entradas.as_view()),
-    #path('entrada/<id>/vender/',Entradas.vender),
+    path('entrada/<id>/vender/',views.vender),
     path('login/', LoginView.as_view(template_name='login.html')),
     path('logout/', LogoutView.as_view()),
     path('eventos/<int:evento_id>', views.ver_evento),
     path('eventos/<int:evento_id>/borrar', views.borrar_evento),
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
     path('eventos/crear', views.VistaCrearEvento.as_view()),
+    path('eventos/<int:evento_id>/cancelar', views.cancelar_venta),
     path('qr', views.QR),
     path('scan', views.scan)
 ]

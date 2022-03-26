@@ -15,7 +15,8 @@ from django.views.generic.edit import UpdateView, CreateView
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada
-#import proyecto.transacciones
+import proyecto.transacciones
+import datetime
 
 User = get_user_model()
 
@@ -165,6 +166,8 @@ def ver_evento(request, evento_id):
     no_log = True
     no_duenho = False
     es_duenho = False
+    entrada = None
+    transaccion = None
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     print(request.user)
     if hay_evento == True:
@@ -175,14 +178,20 @@ def ver_evento(request, evento_id):
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            evento = Evento.objects.get(id=evento_id)
             if cliente_exists:
+                cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
-                evento = Evento.objects.get(id=evento_id)
-                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"user":usuario})
+                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
+                transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False)
+                if entrada_exists.count() > 0:
+                    entrada = entrada_exists.first()
+                if transaccion_exists.count() > 0:
+                    transaccion = transaccion_exists.first()
             elif empresa_exists:
-                evento = Evento.objects.get(id=evento_id)
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
-                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"user":usuario})
+            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
+                    "es_duenho":es_duenho,"user":usuario, "has_entrada": entrada is not None, "en_venta": transaccion is not None})
     else:
         response = redirect('/error/')
         return response
@@ -239,14 +248,26 @@ class VistaCrearEvento(CreateView):
 
 class Entradas(View):
     def get(self, request, id):
-        print(id)
+        print('El id es'+id)
         entrada = Entrada.objects.get(id=id)
         if request.method == 'POST':
             id = request.POST.get('id')
         print(entrada)
         return render(request,'entrada.html', {"entrada":entrada})
 
-    #def vender(self, request, id):
-        #o_user = User.objects.get(id=request.user.id)
-        #cliente = Cliente.objects.get(user = o_user)
-        #proyecto.transacciones.poner_venta(evento, cliente, fech)
+def vender(request, id):
+    o_user = User.objects.get(id=request.user.id)
+    entrada = Entrada.objects.get(id=id)
+    cliente = Cliente.objects.get(user = o_user)
+    fech = datetime.datetime.now()
+    proyecto.transacciones.poner_venta(entrada.evento, cliente, fech)
+    return render(request,'entrada.html', {"entrada":entrada})
+
+def cancelar_venta(request, evento_id):
+    o_user = User.objects.get(id=request.user.id)
+    evento = Evento.objects.get(id=evento_id)
+    cliente = Cliente.objects.get(user = o_user)
+    entrada = Entrada.objects.get(cliente = cliente, evento = evento)
+    transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False).first()
+    proyecto.transacciones.cancelar_venta(entrada, transaccion)
+    return render(request,'cancelacion.html', {"entrada":entrada})
