@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model
@@ -9,9 +10,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
+from django.shortcuts import redirect, render
+from django.views.generic.edit import UpdateView, CreateView
+from .models import Evento
 import proyecto.qr
 import proyecto.entrada
-#import proyecto.transacciones
+import proyecto.transacciones
+import datetime
 
 User = get_user_model()
 
@@ -58,9 +63,7 @@ class ErrorVista(TemplateView):
     template_name = 'error.html'
 
 class WelcomeClient(View):
-    
     def get(self, request):
-
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -73,20 +76,16 @@ class WelcomeClient(View):
                 return response
             else:
                 cliente = Cliente.objects.get(user=usuario)
-
                 context = {
                     'cliente': cliente
                 }
-            
                 return render (request, 'welcome_client.html')
         else:
             response = redirect('/error/')
             return response
 
 class ClientProfile(View):
-    
     def get(self, request, id):
-        
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -116,9 +115,7 @@ class ClientProfile(View):
             return response
         
 class WelcomeBusiness(View):
-    
     def get(self, request):
-
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -134,13 +131,9 @@ class WelcomeBusiness(View):
         else:
             response = redirect('/error/')
             return response
-        
-        
 
 class BusinnessProfile(View):
-    
     def get(self, request, id):
-        
         if request.user.id == None:
             response = redirect('/error/')
             return response
@@ -164,23 +157,117 @@ class BusinnessProfile(View):
                     context = {
                         'empresa': empresa,
                     }
-            
                 return render (request, 'empresa.html', context)
         else:
             response = redirect('/error/')
             return response
 
+def ver_evento(request, evento_id): 
+    no_log = True
+    no_duenho = False
+    es_duenho = False
+    entrada = None
+    transaccion = None
+    hay_evento = Evento.objects.filter(id=evento_id).exists()
+    print(request.user)
+    if hay_evento == True:
+        if request.user.id==None:
+            response = redirect('/error/')
+            return response
+        else:
+            usuario = User.objects.get(id=request.user.id)
+            empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
+            cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            evento = Evento.objects.get(id=evento_id)
+            if cliente_exists:
+                cliente = Cliente.objects.get(user = usuario)
+                no_duenho = True
+                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
+                transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False)
+                if entrada_exists.count() > 0:
+                    entrada = entrada_exists.first()
+                if transaccion_exists.count() > 0:
+                    transaccion = transaccion_exists.first()
+            elif empresa_exists:
+                es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
+            return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
+                    "es_duenho":es_duenho,"user":usuario, "has_entrada": entrada is not None, "en_venta": transaccion is not None})
+    else:
+        response = redirect('/error/')
+        return response
+
+def borrar_evento(request, evento_id):
+    if request.user.id == None:
+            response = redirect('/error/')
+            return response
+    hay_evento = Evento.objects.filter(id=evento_id).exists()
+    if hay_evento == True:
+        Evento.objects.filter(pk=evento_id).delete()
+        eventos = Evento.objects.all()
+        return redirect('/empresa/'+str(request.user.id)+'/')
+    else:
+        response = redirect('/error/')
+        return response
+
+class VistaEditarEvento(UpdateView):
+    # specify the model you want to use
+    model = Evento
+    template_name="editar_evento.html"
+    # specify the fields
+    fields = [
+        "fecha",
+        "precioEntrada",
+        "totalEntradas",
+        "nombre",
+        "descripcion",
+        "ubicacion",
+        "imagen",
+    ]
+    success_url ="/welcome_bussiness/"
+
+class VistaCrearEvento(CreateView):
+    # specify the model you want to use
+    model = Evento
+    success_url ="/welcome_bussiness/"
+    template_name="crear_evento.html"
+    # specify the fields
+    fields = [
+        "fecha",
+        "precioEntrada",
+        "totalEntradas",
+        "nombre",
+        "descripcion",
+        "ubicacion",
+        "imagen",
+        "salt",
+    ]
+    def form_valid(self, form):
+        form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        return super().form_valid(form)
+
 
 class Entradas(View):
     def get(self, request, id):
-        print(id)
+        print('El id es'+id)
         entrada = Entrada.objects.get(id=id)
         if request.method == 'POST':
             id = request.POST.get('id')
         print(entrada)
         return render(request,'entrada.html', {"entrada":entrada})
 
-    #def vender(self, request, id):
-        #o_user = User.objects.get(id=request.user.id)
-        #cliente = Cliente.objects.get(user = o_user)
-        #proyecto.transacciones.poner_venta(evento, cliente, fech)
+def vender(request, id):
+    o_user = User.objects.get(id=request.user.id)
+    entrada = Entrada.objects.get(id=id)
+    cliente = Cliente.objects.get(user = o_user)
+    fech = datetime.datetime.now()
+    proyecto.transacciones.poner_venta(entrada.evento, cliente, fech)
+    return render(request,'entrada.html', {"entrada":entrada})
+
+def cancelar_venta(request, evento_id):
+    o_user = User.objects.get(id=request.user.id)
+    evento = Evento.objects.get(id=evento_id)
+    cliente = Cliente.objects.get(user = o_user)
+    entrada = Entrada.objects.get(cliente = cliente, evento = evento)
+    transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False).first()
+    proyecto.transacciones.cancelar_venta(entrada, transaccion)
+    return render(request,'cancelacion.html', {"entrada":entrada})
