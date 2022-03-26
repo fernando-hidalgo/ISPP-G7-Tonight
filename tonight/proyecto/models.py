@@ -1,4 +1,5 @@
 from distutils.command.upload import upload
+from pyexpat import model
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
@@ -47,3 +48,15 @@ class Entrada(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='cliente')
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='evento')
     hash = models.CharField(max_length=100, blank=True)
+
+class Transaccion(models.Model):
+    TYPE = (
+        ('V', 'Vender'),
+        ('C', 'Comprar'),
+    )
+    tipo = models.CharField(max_length=1, choices=TYPE)
+    fechaAudit = models.DateTimeField()
+    fechaLimite = models.DateTimeField()
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='cliente_trans')
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='evento_trans', blank=True)
+    done = models.BooleanField(default=False)

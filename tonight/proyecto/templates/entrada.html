@@ -1,0 +1,33 @@
+<div>
+    <h1>Entrada</h1>
+    <hr>
+</div>
+<div>
+	<ul>
+       <hr>
+       <li>
+            <h4>Evento: {{entrada.evento.nombre}}</h4>
+       </li>
+        <li>
+            <h4>fecha compra: {{etnrada.fechaCompra}}</h4>
+        </li>
+        <li>
+            <h4>fecha caducidad: {{entrada.fechaCaducidad}}</h4>
+        </li>
+        <li>
+            <h4>Estado: {{entrada.estado}}</h4>
+        </li>
+        <li>
+            <h4>Cliente: {{entrada.cliente.user}}</h4>
+        </li>
+        <li>
+            <h4>Hash: {{entrada.hash}}</h4>
+        </li>
+	</ul>
+    <form method="POST" class="form-signin" action="/entrada/{{entrada.id}}/vender/">
+        {% csrf_token %}
+        <input type="text" id="id" class="form-control" name="id" value="{{entrada.id}}" required hidden readonly>
+        <input type="datetime-local" id="fechLimite"  class="form-control">
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Vender entrada</button>
+    </form>
+</div>
