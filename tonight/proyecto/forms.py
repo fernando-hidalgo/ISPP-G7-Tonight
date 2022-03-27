@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-
 from django.forms import ModelForm
 from proyecto.models import Cliente
+from phonenumber_field.formfields import PhoneNumberField
+from phonenumber_field.widgets import PhoneNumberPrefixWidget
 
 class UserForm(UserCreationForm):
 
@@ -34,6 +35,10 @@ class UserModelForm(ModelForm):
 
 
 class ClienteModelForm(ModelForm):
+
+    tlf = PhoneNumberField(
+        widget = PhoneNumberPrefixWidget(initial='ES')
+    )
     class Meta:
         model = Cliente
         exclude = ('user', 'saldo')
