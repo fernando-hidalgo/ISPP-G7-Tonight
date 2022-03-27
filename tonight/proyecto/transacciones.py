@@ -1,7 +1,8 @@
 
 from telnetlib import STATUS
 from turtle import done
-from proyecto.models import *
+from proyecto.models import Entrada
+from proyecto.models import Transaccion
 import datetime
 import proyecto.entrada
 
@@ -26,7 +27,6 @@ def check_transacciones(transaccion):
         if transacciones is not None:
             transaccion_select = Transaccion.objects.get(id=transacciones[0]['id']) 
             make_transaccion(transaccion, transaccion_select)
-    return
 
 def poner_venta(evento, cliente, fech):
     transaccion = Transaccion.objects.create(tipo='V', fechaAudit=datetime.now(), fechaLimite=fech, evento=evento, cliente=cliente)
