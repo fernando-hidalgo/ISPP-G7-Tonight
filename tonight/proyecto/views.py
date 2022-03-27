@@ -230,10 +230,10 @@ class VistaCrearEvento(CreateView):
         "descripcion",
         "ubicacion",
         "imagen",
-        "salt",
     ]
     def form_valid(self, form):
         form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        form.instance.salt = 'pipo112'
         return super().form_valid(form)
 
 
