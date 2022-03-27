@@ -12,10 +12,10 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
+from .forms import UserForm, ClienteModelForm, EmpresaModelForm
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada
-#import proyecto.transacciones
 
 User = get_user_model()
 
@@ -49,10 +49,10 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
-                response = redirect('/welcome_bussiness/')
+                response = redirect('/empresa/'+str(request.user.id)+'/')
                 return response
             if cliente_exists:
-                response = redirect('/welcome_client/')
+                response = redirect('/eventos/')
                 return response
         else:
             response = redirect('/error/')
@@ -60,6 +60,9 @@ class InicioVista(View):
 
 class ErrorVista(TemplateView):
     template_name = 'error.html'
+
+class WelcomeVista(TemplateView):
+    template_name = 'welcome.html'
 
 class WelcomeClient(View):
     def get(self, request):
@@ -112,6 +115,82 @@ class ClientProfile(View):
         else:
             response = redirect('/error/')
             return response
+
+
+class ClientCreate(CreateView):
+     # specify the model you want to use
+    model = Cliente
+    template_name="crear_cliente.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = ClienteModelForm
+    success_url = "/login/"
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        if 'form2' not in context:
+            context['form2'] = self.second_form_class(self.request.GET)
+        return context
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        form2 = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.saldo = 0
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/login/')
+        else:
+            return redirect('/error/')
+
+    def form_valid(self, form, form2):
+        form.save()
+        form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
+
+class EmpresaCreate(CreateView):
+     # specify the model you want to use
+    model = Empresa
+    template_name="crear_empresa.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = EmpresaModelForm
+    success_url = "/login/"
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpresaCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        if 'form2' not in context:
+            context['form2'] = self.second_form_class(self.request.GET)
+        return context
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        form2 = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and form2.is_valid():
+            empresa = form2.save(commit=False)
+            empresa.user = form.save()
+            empresa.save()
+            return redirect('/login/')
+        else:
+            return redirect('/error/')
+
+    def form_valid(self, form, form2):
+        form.save()
+        form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
         
 class WelcomeBusiness(View):
     def get(self, request):
