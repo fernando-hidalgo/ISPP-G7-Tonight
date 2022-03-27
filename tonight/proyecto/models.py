@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.contrib.auth.models import User
+from phonenumber_field.modelfields import PhoneNumberField
 
 import datetime
 # Create your models here.
@@ -11,7 +12,7 @@ import datetime
 class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
     saldo = models.PositiveIntegerField()
-    tlf = models.PositiveIntegerField()
+    tlf = PhoneNumberField(unique = True)
     imagen = models.ImageField(blank=True, upload_to='media/')
 
 class Empresa(models.Model):

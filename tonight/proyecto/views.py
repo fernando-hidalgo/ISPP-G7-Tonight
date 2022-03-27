@@ -12,11 +12,10 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm
+from .forms import UserForm, ClienteModelForm
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada
-#import proyecto.transacciones
 
 User = get_user_model()
 
@@ -120,14 +119,41 @@ class ClientProfile(View):
 
 class ClientCreate(CreateView):
      # specify the model you want to use
-    model = User
+    model = Cliente
     template_name="crear_cliente.html"
     # specify the fields
-    form_class=UserForm
-    success_url ="/eventos/"
-    def form_valid(self, form):
-        form.instance.saldo = 0
-        return super().form_valid(form)
+    form_class = UserForm
+    second_form_class = ClienteModelForm
+    success_url = "/login/"
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        if 'form2' not in context:
+            context['form2'] = self.second_form_class(self.request.GET)
+        return context
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        form2 = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.saldo = 0
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/login/')
+        else:
+            return redirect('/error/')
+
+    def form_valid(self, form, form2):
+        form.save()
+        form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
         
 class WelcomeBusiness(View):
     def get(self, request):
