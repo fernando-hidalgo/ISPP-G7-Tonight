@@ -2,7 +2,7 @@ from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model
-from proyecto.models import Cliente, Empresa, Evento, Entrada, Transaccion
+from proyecto.models import Cliente, Empresa, Evento, Entrada, Transaccion, Empleado
 from django.contrib.auth.models import User
 import json
 from django.conf import settings
@@ -177,8 +177,18 @@ class EmpresaCreate(CreateView):
         form2 = self.second_form_class(request.POST, request.FILES)
         if form.is_valid() and form2.is_valid():
             empresa = form2.save(commit=False)
-            empresa.user = form.save()
+            usuario = form.save()
+            empresa.user = usuario
             empresa.save()
+            empleado = Empleado()
+            empleado.empresa = empresa
+            usuario2 = User()
+            usuario2.username = 'empleado_'+empresa.user.username
+            usuario2.password = empresa.user.password
+            usuario2.email = empresa.user.email
+            usuario2.save()
+            empleado.user = usuario2
+            empleado.save()
             return redirect('/login/')
         else:
             return redirect('/error/')
