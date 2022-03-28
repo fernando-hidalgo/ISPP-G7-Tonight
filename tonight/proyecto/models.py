@@ -18,6 +18,10 @@ class Empresa(models.Model):
     tlf = models.PositiveIntegerField()
     imagen = models.ImageField(blank=True, upload_to='media/')
 
+    def __str__(self):
+        return str(self.id) + str(self.user)
+    
+
 class Empleado(models.Model):
     user = models.OneToOneField(User, related_name='user_epld', on_delete=models.CASCADE)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)

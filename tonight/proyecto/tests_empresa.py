@@ -1,7 +1,7 @@
 from ast import Try
 from itertools import count
 from unicodedata import name
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.contrib.auth.models import User
 from django.db.utils import DataError, IntegrityError
 from .models import Empresa
@@ -16,7 +16,7 @@ import os
 
 # Create your tests here.
 
-class EmpresaTestCase(StaticLiveServerTestCase):
+class EmpresaTestCase(TransactionTestCase):
 
     def setUp(self):    
         user_admin = User(username='admin', is_staff=True,  is_superuser=True, first_name='admin', last_name='last_name_admin', email='admin@gmail.com') 
@@ -29,12 +29,12 @@ class EmpresaTestCase(StaticLiveServerTestCase):
     def tearDown(self):
         super().tearDown()
 
-    def test_empresa_positivo(self):
+    def test_tlf_positivo(self):
         empresa = Empresa(user=User.objects.get(username='admin'), tlf=34)
         empresa.save()
         self.assertEqual(Empresa.objects.count(), 1)   
 
-    def test_empresa_con_usuario_duplicado(self):
+    def test_usuario_duplicado(self):
         empresa1 = Empresa(user=User.objects.get(username='admin'), tlf=34)
         empresa1.save()
         empresa2 = Empresa(user=User.objects.get(username='admin'), tlf=666)
@@ -43,7 +43,7 @@ class EmpresaTestCase(StaticLiveServerTestCase):
         except IntegrityError as e:
             self.assertIn('Duplicate entry', str(e))
 
-    def test_negative_tlf(self):
+    def test_tlf_negativo(self):
         empresa = Empresa(user=User.objects.get(username='admin'), tlf=-34)
         try:
             empresa.save()
@@ -61,6 +61,8 @@ class EmpresaTestCase(StaticLiveServerTestCase):
 
     
 class SeleniumTestCase(StaticLiveServerTestCase):
+
+    reset_sequences = True
     
     def setUp(self):
         user_admin = User(username='admin', is_staff=True,  is_superuser=True, first_name='admin', last_name='last_name_admin', email='admin@gmail.com') 
