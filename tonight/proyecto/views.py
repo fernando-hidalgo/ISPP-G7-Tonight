@@ -241,8 +241,6 @@ class Entradas(View):
     def get(self, request, id):
         print(id)
         entrada = Entrada.objects.get(id=id)
-        if request.method == 'POST':
-            id = request.POST.get('id')
         print(entrada)
         return render(request,'entrada.html', {"entrada":entrada})
 
