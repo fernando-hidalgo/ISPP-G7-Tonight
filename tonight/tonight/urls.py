@@ -2,13 +2,14 @@ from django.contrib import admin
 from django.urls import path
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
-from proyecto.views import ClientProfile, WelcomeClient, InicioVista, ErrorVista, BusinnessProfile, WelcomeBusiness, Entradas, WelcomeVista, ClientCreate, EmpresaCreate
+from proyecto.views import ClientProfile, WelcomeClient, InicioVista, ErrorVista, BusinnessProfile, WelcomeBusiness, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('', WelcomeVista.as_view()),
     path('eventos/', views.listar_eventos),
+    path('empleados/<int:empleado_id>/', views.listar_eventos_empleado),
     path('admin/', admin.site.urls),
     path('crear_cliente/', ClientCreate.as_view()),
     path('crear_empresa/', EmpresaCreate.as_view()),
@@ -24,6 +25,7 @@ urlpatterns = [
     #path('entrada/<id>/vender/',Entradas.vender),
     path('login/', LoginView.as_view(template_name='login.html')),
     path('logout/', LogoutView.as_view()),
+    path('empleados/crear', EmpleadoCreate.as_view()),
     path('eventos/<int:evento_id>', views.ver_evento),
     path('eventos/<int:evento_id>/borrar', views.borrar_evento),
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),

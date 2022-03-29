@@ -24,6 +24,10 @@ def listar_eventos(request):
     eventos = Evento.objects.all()
     return render(request,'listar_eventos.html', {"eventos":eventos})
 
+def listar_eventos_empleado(request, empleado_id): 
+    
+    return render(request,'empleado.html')
+
 def QR(request):
     proyecto.qr.init_qr()
     return render(request,'qr.html')
@@ -48,11 +52,15 @@ class InicioVista(View):
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
                 response = redirect('/empresa/'+str(request.user.id)+'/')
                 return response
             if cliente_exists:
                 response = redirect('/eventos/')
+                return response
+            if empleado_exists:
+                response = redirect('/empleados/'+str(request.user.id)+'/')
                 return response
         else:
             response = redirect('/error/')
@@ -149,6 +157,39 @@ class ClientCreate(CreateView):
     def form_valid(self, form, form2):
         form.save()
         form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
+
+class EmpleadoCreate(CreateView):
+     # specify the model you want to use
+    model = Empleado
+    template_name="crear_empleado.html"
+    # specify the fields
+    form_class = UserForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpleadoCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        return context
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            empleado = Empleado()
+            empleado.user = form.save()
+            empleado.empresa = Empresa.objects.get(user = request.user)
+            print(request.user.id)
+            empleado.save()
+            return redirect('/empresa/' + str(request.user.id) + '/')
+        else:
+            return redirect('/error/')
+
+    def form_valid(self, form):
+        form.save()
         usuario = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
         usuario = authenticate(username=usuario, password=password)
