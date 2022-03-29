@@ -1,4 +1,4 @@
 
 tonight/proyecto/__pycache__/
-
-tonight/proyecto/cliente/__pycache__/
+tonight/migrations/__pycache__/
+*.pyc

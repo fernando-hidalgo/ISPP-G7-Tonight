@@ -17,6 +17,12 @@ import proyecto.qr
 import proyecto.entrada
 #import proyecto.transacciones
 
+from django.conf import settings
+from paypal.standard.forms import PayPalPaymentsForm
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+
+
 User = get_user_model()
 
 # Create your views here.
@@ -250,3 +256,29 @@ class Entradas(View):
         #o_user = User.objects.get(id=request.user.id)
         #cliente = Cliente.objects.get(user = o_user)
         #proyecto.transacciones.poner_venta(evento, cliente, fech)
+        
+
+def process_payment(request):
+    host = request.get_host()
+
+    paypal_dict = {
+        'business': settings.PAYPAL_RECEIVER_EMAIL,
+        'amount': '7',
+        'item_name': 'Bobis',
+        'currency_code': 'EUR',
+        'notify_url': 'http://{}{}'.format(host,reverse('paypal-ipn')),
+        'return_url': 'http://{}{}'.format(host,reverse('payment_done')),
+        'cancel_return': 'http://{}{}'.format(host,reverse('payment_cancelled')),
+    }
+
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    return render(request, 'process_payment.html', {'form': form})
+
+@csrf_exempt
+def payment_done(request):
+    return render(request, 'payment_done.html')
+
+
+@csrf_exempt
+def payment_canceled(request):
+    return render(request, 'payment_cancelled.html')
