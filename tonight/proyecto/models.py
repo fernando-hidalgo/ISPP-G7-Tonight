@@ -53,6 +53,7 @@ class Transaccion(models.Model):
     TYPE = (
         ('V', 'Vender'),
         ('C', 'Comprar'),
+        ('N', 'Neutralizar')
     )
     tipo = models.CharField(max_length=1, choices=TYPE)
     fechaAudit = models.DateTimeField()

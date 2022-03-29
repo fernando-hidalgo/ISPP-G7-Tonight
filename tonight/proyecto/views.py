@@ -1,4 +1,7 @@
+from hashlib import new
+from time import time
 from urllib import request
+from datetime import date, datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model
@@ -12,11 +15,15 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
+
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada
 import proyecto.transacciones
 import datetime
+from proyecto.forms import TransactionForm
+from proyecto.transacciones import poner_venta,poner_compra
+from proyecto.entrada import create_entrada
 
 User = get_user_model()
 
@@ -191,7 +198,8 @@ def ver_evento(request, evento_id):
             elif empresa_exists:
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
-                    "es_duenho":es_duenho,"user":usuario, "has_entrada": entrada is not None, "en_venta": transaccion is not None})
+                    "es_duenho":es_duenho,"user":usuario, "has_entrada": entrada is not None,
+                     "en_venta": transaccion is not None})
     else:
         response = redirect('/error/')
         return response
@@ -253,21 +261,51 @@ class Entradas(View):
         if request.method == 'POST':
             id = request.POST.get('id')
         print(entrada)
-        return render(request,'entrada.html', {"entrada":entrada})
+        return render(request,'detalles_evento.html', {"entrada":entrada})
 
-def vender(request, id):
-    o_user = User.objects.get(id=request.user.id)
-    entrada = Entrada.objects.get(id=id)
-    cliente = Cliente.objects.get(user = o_user)
-    fech = datetime.datetime.now()
-    proyecto.transacciones.poner_venta(entrada.evento, cliente, fech)
-    return render(request,'entrada.html', {"entrada":entrada})
+def vender(request, evento_id):
+    if request.method == 'POST':
+        form = proyecto.forms.TransactionForm(request.POST)
+        evento = Evento.objects.get(id=evento_id)
+        if form.is_valid():
+            usuario = User.objects.get(id=request.user.id)
+            dia = form.cleaned_data["dia"]
+            hora = form.cleaned_data["hora"]
+            fechLimite = datetime.datetime.combine(dia,hora)
+            cliente = Cliente.objects.get(user = usuario)
+            poner_venta(evento, cliente, fechLimite)
+        return redirect(ver_evento, evento_id=evento.id)
+    else:
+        form = proyecto.forms.TransactionForm()
+        return render(request, 'transaccion.html', {'form':form, 'id':evento_id})
 
-def cancelar_venta(request, evento_id):
+def orden_comprar(request, evento_id):
+    if request.method == 'POST':
+        form = proyecto.forms.TransactionForm(request.POST)
+        evento = Evento.objects.get(id=evento_id)
+        if form.is_valid():
+            usuario = User.objects.get(id=request.user.id)
+            dia = form.cleaned_data["dia"]
+            hora = form.cleaned_data["hora"]
+            fechLimite = datetime.datetime.combine(dia,hora)
+            cliente = Cliente.objects.get(user = usuario)
+            poner_compra(evento, cliente, fechLimite)
+        return redirect(ver_evento, evento_id=evento.id)
+    else:
+        form = proyecto.forms.TransactionForm()
+        return render(request, 'transaccion.html', {'form':form, 'id':evento_id})
+    
+def cancelar_transaccion(request, evento_id):
     o_user = User.objects.get(id=request.user.id)
     evento = Evento.objects.get(id=evento_id)
     cliente = Cliente.objects.get(user = o_user)
-    entrada = Entrada.objects.get(cliente = cliente, evento = evento)
     transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False).first()
-    proyecto.transacciones.cancelar_venta(entrada, transaccion)
-    return render(request,'cancelacion.html', {"entrada":entrada})
+    proyecto.transacciones.cancelar_transaccion(transaccion)
+    return redirect(ver_evento, evento_id=evento.id)
+
+def compra_directa(request, evento_id):
+    o_user = User.objects.get(id=request.user.id)
+    cliente = Cliente.objects.get(user = o_user)
+    evento = Evento.objects.get(id=evento_id)
+    create_entrada(cliente,evento)
+    return redirect(ver_evento, evento_id=evento.id)

@@ -87,8 +87,13 @@
                     Vender</button>
                   {% endif %}
                 {% else %}
-                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/comprar'">
-                  Comprar</button>
+                    {% if evento.totalEntradas == 0 %}
+                      <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/orden_comprar'">
+                        Orden compra</button>
+                    {% else %}
+                      <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/comprar'">
+                      Comprar</button>
+                    {% endif %}
                 {% endif %}
             {% endif %}
         </div>

@@ -12,6 +12,16 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
+import datetime
+from django.conf import settings
+from django.utils.timezone import make_aware
+
+naive_datetime = datetime.datetime.now()
+naive_datetime.tzinfo  # None
+
+settings.TIME_ZONE  # 'UTC'
+aware_datetime = make_aware(naive_datetime)
+aware_datetime.tzinfo  # <UTC>
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
