@@ -7,3 +7,4 @@ whitenoise
 qrcode
 dj-database-url
 opencv-python-headless
+django-paypal

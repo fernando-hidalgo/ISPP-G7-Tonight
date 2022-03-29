@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',
     'proyecto',
+    'paypal.standard.ipn', 
 ]
 
 MIDDLEWARE = [
@@ -79,12 +80,12 @@ WSGI_APPLICATION = 'tonight.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': 'tonight',
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'toNight',
         'USER': 'root',
         'PASSWORD': 'password',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '3306',
     }
 }
 if os.environ.get('GITHUB_WORKFLOW'):
@@ -154,3 +155,7 @@ LOGIN_REDIRECT_URL = '/inicio/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 APPEND_SLASH=False
+
+# Paypal
+PAYPAL_RECEIVER_EMAIL = 'empresa@tonight.com'
+PAYPAL_TEST = True
