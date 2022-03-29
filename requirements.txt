@@ -1,0 +1,9 @@
+wheel
+Pillow
+django
+psycopg2
+gunicorn
+whitenoise
+qrcode
+opencv-python
+dj-database-url
