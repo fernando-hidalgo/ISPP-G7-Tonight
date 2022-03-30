@@ -7,9 +7,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', LoginView.as_view(template_name='login.html')),
+    path('', WelcomeVista.as_view()),
     path('eventos/', views.listar_eventos),
     path('admin/', admin.site.urls),
+    # path('welcome/', WelcomeVista.as_view()),
+    path('crear_cliente/', ClientCreate.as_view()),
     path('welcome_client/', WelcomeClient.as_view()),
     path('welcome_bussiness/', WelcomeBusiness.as_view()),
     path('inicio/', InicioVista.as_view()),
@@ -27,7 +29,7 @@ urlpatterns = [
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
     path('eventos/crear', views.VistaCrearEvento.as_view()),
     path('qr', views.QR),
-    path('scan', views.scan),
+    path('scan', views.scan)
     
     #PAYPAL
     path('paypal/', include('paypal.standard.ipn.urls')),

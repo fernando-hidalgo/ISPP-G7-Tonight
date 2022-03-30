@@ -1,9 +1,10 @@
-from distutils.command.upload import upload
-from pyexpat import model
-from django.db import models
-from django.core.validators import MinValueValidator
-from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.core.validators import MinValueValidator
+from django.db import models
+from pyexpat import model
+from distutils.command.upload import upload
 
 import datetime
 # Create your models here.
@@ -11,7 +12,7 @@ import datetime
 class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
     saldo = models.PositiveIntegerField()
-    tlf = models.PositiveIntegerField()
+    tlf = PhoneNumberField(unique = True)
     imagen = models.ImageField(blank=True, upload_to='media/')
 
 class Empresa(models.Model):

@@ -41,8 +41,8 @@ def scan(request):
         data = request.POST.get('hash')
         evento = Evento.objects.get(id=4)
         proyecto.entrada.exchange_entrada(data, evento)
-        return HttpResponse(status=200)
     else:
+        return HttpResponse(status=200)
         return render(request, 'scan.html')
 
 class InicioVista(View):
@@ -56,8 +56,8 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
-                response = redirect('/welcome_bussiness/')
                 return response
+                response = redirect('/welcome_bussiness/')
             if cliente_exists:
                 response = redirect('/welcome_client/')
                 return response
@@ -70,6 +70,9 @@ class InicioVista(View):
 
 class ErrorVista(TemplateView):
     template_name = 'error.html'
+
+class WelcomeVista(TemplateView):
+    template_name = 'welcome.html'
 
 class WelcomeClient(View):
     def get(self, request):
@@ -122,7 +125,45 @@ class ClientProfile(View):
         else:
             response = redirect('/error/')
             return response
+
+
+class ClientCreate(CreateView):
+     # specify the model you want to use
+    model = Cliente
+    template_name="crear_cliente.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = ClienteModelForm
+    success_url = "/login/"
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        if 'form2' not in context:
+            context['form2'] = self.second_form_class(self.request.GET)
+        return context
         
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        form2 = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.saldo = 0
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/login/')
+        else:
+            return redirect('/error/')
+
+    def form_valid(self, form, form2):
+        form.save()
+        form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
 class WelcomeBusiness(View):
     def get(self, request):
         if request.user.id == None:
@@ -240,12 +281,11 @@ class VistaCrearEvento(CreateView):
         "descripcion",
         "ubicacion",
         "imagen",
+        "salt",
     ]
     def form_valid(self, form):
         form.instance.empresa = Empresa.objects.get(user =self.request.user)
-        form.instance.salt = 'pipo112'
         return super().form_valid(form)
-
 
 class Entradas(View):
     def get(self, request, id):
@@ -260,7 +300,6 @@ class Entradas(View):
         #o_user = User.objects.get(id=request.user.id)
         #cliente = Cliente.objects.get(user = o_user)
         #proyecto.transacciones.poner_venta(evento, cliente, fech)
-        
 
 def recargar_saldo(request, id):
     if request.method == 'POST':
