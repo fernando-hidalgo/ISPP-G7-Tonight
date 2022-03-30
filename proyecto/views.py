@@ -57,10 +57,10 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
+                response = redirect('/empresa/{}/'.format(request.user.id))
                 return response
-                response = redirect('/welcome_bussiness/')
             if cliente_exists:
-                response = redirect('/welcome_client/')
+                response = redirect('/eventos/')
                 return response
             else:
                 response = redirect('/admin/')
@@ -74,28 +74,6 @@ class ErrorVista(TemplateView):
 
 class WelcomeVista(TemplateView):
     template_name = 'welcome.html'
-
-class WelcomeClient(View):
-    def get(self, request):
-        if request.user.id == None:
-            response = redirect('/error/')
-            return response
-        hayUsuario = User.objects.filter(id=request.user.id).exists()
-        if hayUsuario == True:
-            usuario = User.objects.get(id=request.user.id)
-            cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
-            if not cliente_exists:
-                response = redirect('/error/')
-                return response
-            else:
-                cliente = Cliente.objects.get(user=usuario)
-                context = {
-                    'cliente': cliente
-                }
-                return render (request, 'welcome_client.html')
-        else:
-            response = redirect('/error/')
-            return response
 
 class ClientProfile(View):
     def get(self, request, id):
@@ -164,24 +142,6 @@ class ClientCreate(CreateView):
         password = form.cleaned_data.get('password')
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
-
-class WelcomeBusiness(View):
-    def get(self, request):
-        if request.user.id == None:
-            response = redirect('/error/')
-            return response
-        hayUsuario = User.objects.filter(id=request.user.id).exists()
-        if hayUsuario == True:
-            usuario = User.objects.get(id=request.user.id)
-            empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
-            if not empresa_exists:
-                response = redirect('/error/')
-                return response
-            else:
-                return render (request, 'welcome_bussiness.html')
-        else:
-            response = redirect('/error/')
-            return response
 
 class BusinnessProfile(View):
     def get(self, request, id):

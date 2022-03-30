@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
-from proyecto.views import ClientProfile, WelcomeClient, InicioVista, ErrorVista, BusinnessProfile, WelcomeBusiness, Entradas, WelcomeVista, ClientCreate
+from proyecto.views import ClientProfile, InicioVista, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -12,8 +12,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('welcome/', WelcomeVista.as_view()),
     path('crear_cliente/', ClientCreate.as_view()),
-    path('welcome_client/', WelcomeClient.as_view()),
-    path('welcome_bussiness/', WelcomeBusiness.as_view()),
     path('inicio/', InicioVista.as_view()),
     path('cliente/<id>/', ClientProfile.as_view()),
     path('empresa/<id>/', BusinnessProfile.as_view()),
@@ -23,7 +21,7 @@ urlpatterns = [
     path('entrada/<id>/',Entradas.as_view()),
     #path('entrada/<id>/vender/',Entradas.vender),
     path('login/', LoginView.as_view(template_name='login.html')),
-    path('logout/', LogoutView.as_view()),
+    path('logout/', LogoutView.as_view(template_name='welcome.html')),
     path('eventos/<int:evento_id>', views.ver_evento),
     path('eventos/<int:evento_id>/borrar', views.borrar_evento),
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
