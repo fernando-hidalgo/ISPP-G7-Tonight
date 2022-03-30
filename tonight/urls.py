@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', WelcomeVista.as_view()),
-    path('eventos/', views.listar_eventos),
+    path('eventos/', views.listar_eventos, name='payment_done'),
     path('admin/', admin.site.urls),
     # path('welcome/', WelcomeVista.as_view()),
     path('crear_cliente/', ClientCreate.as_view()),

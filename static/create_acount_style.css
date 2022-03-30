@@ -1,0 +1,115 @@
+body{
+    background-color: #000000;
+    color: #000000;
+    background-image:#000000;
+}
+
+input[type=text], input[type=date], input[type=number], input[type=email], input[type=password]{
+    width: 45%;
+    font-size: 5vw;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 7%;
+    color: #000000;
+    margin-left: 3%;
+}
+
+input[type=file]{
+    font-size: 5vw;
+    border-radius: 4px;
+    margin-bottom: 7%;
+    color: #fff;
+    width: 93%;
+    margin-left: 6%;
+}
+
+textarea{
+    width: 85%;
+    font-size: 5vw;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 7%;
+    color: #000000;
+    margin-left: 7%;
+}
+
+label{
+    color: #fff;
+    margin-top: 1%;
+    margin-left: 5%;
+    background-color: #4C49FA;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 5vw;
+    width: 45%;
+}
+
+.img-fluid{
+    max-width:60%!important;
+    margin-left:23%;
+    margin-top:0%;
+    margin-bottom: 23%;
+}
+
+.btn{
+    background-color: #000000;
+}
+
+.col-6 {
+    flex: 0 0 auto;
+    width: 50%;
+    margin-left: 25%;
+}
+
+.col-3 {
+    flex: 0 0 auto;
+    width: 25%;
+}
+
+.errorlist, .helptext {
+    color: rgb(255, 0, 0);
+    border: 1px solid #ccc;
+    width: 90%;
+    margin-left: 5%;
+}
+
+input[type=submit]{
+    margin-top: 1%;
+    margin-bottom: 5%;
+    margin-left: 25%;
+    font-size: 7vw;
+    background-color: #9A1DC6;
+    border-radius:8px;
+    text-align: center;
+    width: 50%;
+    color: #fff;
+}
+
+label[for=imagen-clear_id]
+{
+    width: 0%;
+    margin-top: 1%;
+    margin-bottom: 5%;
+    font-size: 5vw;
+    background-color: #9A1DC6;
+    border-radius:8px;
+    text-align: center;
+    width: 20%;
+    color: #fff;
+}
+
+a{
+    margin-left: 6%;
+}
+
+select{
+    font-size: 5vw;
+    border-radius: 4px;
+    margin-bottom: 7%;
+    width: 80%;
+    margin-left: 6%;
+}
+
+input[name="tlf_1"] {
+    margin-left: 6%;
+  }

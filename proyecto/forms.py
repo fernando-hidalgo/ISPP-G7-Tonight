@@ -4,6 +4,7 @@ from django.forms import ModelForm
 from proyecto.models import Cliente
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
+from django import forms
 
 class UserForm(UserCreationForm):
 
@@ -14,9 +15,17 @@ class UserForm(UserCreationForm):
             'email',
         ]
         labels = {
-            'username': 'Nombre de usuario',
-            'email': 'Correo electrónico',
+            'username': 'Nombre',
+            'email': 'Correo',
         }
+        help_texts = {
+            'username': None,
+            'email': None,
+        }
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        for field_name in ('username', 'email', 'password1', 'password2'):
+            self.fields[field_name].help_text = ''
 
 
 class UserModelForm(ModelForm):
@@ -28,12 +37,22 @@ class UserModelForm(ModelForm):
             'password',
         ]
         labels = {
-            'username': 'Nombre de usuario',
-            'email': 'Correo electrónico',
+            'username': 'Nombre',
+            'email': 'Correo',
             'password': 'Contraseña',
         }
+        help_texts = {
+            'username': None,
+            'email': None,
+            'password': None,
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super(UserModelForm, self).__init__(*args, **kwargs)
+        for field_name in ('username', 'email', 'password1', 'password2'):
+            self.fields[field_name].help_text = ''
 
-
+        
 class ClienteModelForm(ModelForm):
 
     tlf = PhoneNumberField(
@@ -44,10 +63,20 @@ class ClienteModelForm(ModelForm):
         exclude = ('user', 'saldo')
         fields = ['tlf', "imagen"]
         labels = {
-            'tlf': 'Número de teléfono',
+            'tlf': 'Teléfono',
             'imagen': 'Imagen',
         }
-from django import forms
+        help_texts = {
+            'tlf': None,
+            'imagen': None,
+        }
+    def __init__(self, *args, **kwargs):
+        super(ClienteModelForm, self).__init__(*args, **kwargs)
+        self.fields['imagen'].required = True
+        self.fields['tlf'].required = True
+        for field_name in ('tlf', 'imagen'):
+            self.fields[field_name].help_text = ''
+
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'

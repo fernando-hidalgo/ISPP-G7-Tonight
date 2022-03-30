@@ -1,7 +1,7 @@
 from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
 from proyecto.models import Cliente, Empresa, Evento, Entrada, Transaccion
 from django.contrib.auth.models import User
 import json
@@ -12,7 +12,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm, ClienteModelForm
+from .forms import UserForm, UserModelForm, ClienteModelForm
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada
@@ -105,7 +105,6 @@ class ClientProfile(View):
             response = redirect('/error/')
             return response
 
-
 class ClientCreate(CreateView):
      # specify the model you want to use
     model = Cliente
@@ -133,7 +132,7 @@ class ClientCreate(CreateView):
             cliente.save()
             return redirect('/login/')
         else:
-            return redirect('/error/')
+            return render (request, 'crear_cliente.html', {'form': form, 'form2': form2})
 
     def form_valid(self, form, form2):
         form.save()
@@ -296,7 +295,7 @@ def payment_done(request):
     
     cliente.saldo += rec
     cliente.save()
-    return render(request, 'saldo_exito.html')
+    return render(request, 'saldo_exito.html', {'cantidad': rec, 'total': cliente.saldo})
 
 
 @csrf_exempt

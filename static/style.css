@@ -199,3 +199,11 @@ input[type=submit]{
   width: 50%;
   color: #fff;
 }
+
+.error-description{
+  width: 100%;
+  font-size: 6vw !important;
+  margin-top: 1%;
+  padding: 5%;
+  text-align:center;
+}
