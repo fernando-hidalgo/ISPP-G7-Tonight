@@ -120,7 +120,5 @@ class SeleniumClienteTestCase(StaticLiveServerTestCase):
         self.driver.get(f'{self.live_server_url}/welcome_client/')
         self.driver.find_element_by_xpath("//*[contains(text(), 'Perfil')]").click()
 
-        time.sleep(10)
-
         self.assertEqual(Cliente.objects.count(), 1)
         assert 'Nombre: admin' in self.driver.page_source and 'Correo: admin@email.com' in self.driver.page_source and 'Teléfono: 666999666' in self.driver.page_source
