@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',
     'proyecto',
+    'paypal.standard.ipn', 
 ]
 
 MIDDLEWARE = [
@@ -154,3 +155,7 @@ LOGIN_REDIRECT_URL = '/inicio/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 APPEND_SLASH=False
+
+# Paypal
+PAYPAL_RECEIVER_EMAIL = 'empresa@tonight.com'
+PAYPAL_TEST = True

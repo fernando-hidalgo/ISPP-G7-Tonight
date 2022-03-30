@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from proyecto.views import ClientProfile, WelcomeClient, InicioVista, ErrorVista, BusinnessProfile, WelcomeBusiness, Entradas
@@ -27,7 +27,16 @@ urlpatterns = [
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
     path('eventos/crear', views.VistaCrearEvento.as_view()),
     path('qr', views.QR),
-    path('scan', views.scan)
+    path('scan', views.scan),
+    
+    #PAYPAL
+    path('paypal/', include('paypal.standard.ipn.urls')),
+    #Form view, where user inputs amount to recharge
+    path('cliente/<id>/saldo', views.recargar_saldo),
+    #Succes view
+    path('saldo-exito/', views.payment_done, name='payment_done'),
+    #Fail view
+    path('saldo-cancelado/', views.payment_canceled, name='payment_cancelled'),
 ]
 
 if settings.DEBUG:
