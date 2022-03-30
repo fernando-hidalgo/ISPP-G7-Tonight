@@ -61,6 +61,9 @@ class InicioVista(View):
             if cliente_exists:
                 response = redirect('/welcome_client/')
                 return response
+            else:
+                response = redirect('/admin/')
+                return response
         else:
             response = redirect('/error/')
             return response
