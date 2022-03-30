@@ -24,15 +24,15 @@ class Empleado(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
 class Evento(models.Model):
-    fecha = models.DateTimeField("YYYY-MM-DD HH:mm",validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
-    precioEntrada = models.PositiveIntegerField()
-    totalEntradas = models.PositiveIntegerField()
-    nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(max_length=500)
-    ubicacion = models.CharField(max_length=100)
+    fecha = models.DateTimeField('Fecha', validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
+    precioEntrada = models.PositiveIntegerField('Precio Entrada')
+    totalEntradas = models.PositiveIntegerField('Total Entradas')
+    nombre = models.CharField('Nombre', max_length=100)
+    descripcion = models.TextField('Descripción', max_length=500)
+    ubicacion = models.CharField('Ubicación', max_length=100)
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
-    imagen = models.ImageField(blank=True, upload_to='media/')
+    imagen = models.ImageField('Imagen',blank=True, upload_to='media/')
 
 class Entrada(models.Model):
     fechaCompra = models.DateTimeField()

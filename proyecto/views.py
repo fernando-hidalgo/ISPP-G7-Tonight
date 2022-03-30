@@ -16,18 +16,14 @@ from .models import Evento
 import proyecto.qr
 import proyecto.entrada
 #import proyecto.transacciones
-from proyecto.forms import PaypalAmountForm
 
-#Paypal
 from django.conf import settings
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
+
 User = get_user_model()
-rec = 0
-
-
 
 # Create your views here.
 def listar_eventos(request): 
@@ -240,10 +236,10 @@ class VistaCrearEvento(CreateView):
         "descripcion",
         "ubicacion",
         "imagen",
-        "salt",
     ]
     def form_valid(self, form):
         form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        form.instance.salt = 'pipo112'
         return super().form_valid(form)
 
 
@@ -259,45 +255,30 @@ class Entradas(View):
     #def vender(self, request, id):
         #o_user = User.objects.get(id=request.user.id)
         #cliente = Cliente.objects.get(user = o_user)
-        #proyecto.transacciones.poner_venta(evento, cliente, fech)    
+        #proyecto.transacciones.poner_venta(evento, cliente, fech)
         
-def recargar_saldo(request, id):
-    if request.method == 'POST':
-        form = proyecto.forms.PaypalAmountForm(request.POST)
-        if form.is_valid():
-            cantidad = form.cleaned_data["cantidad"]
-            
-            host = request.get_host()
-            paypal_dict = {
-                'business': settings.PAYPAL_RECEIVER_EMAIL,
-                'amount': cantidad,
-                'item_name': 'Recarga Saldo Tonight',
-                'currency_code': 'EUR',
-                'notify_url': 'http://{}{}'.format(host,reverse('paypal-ipn')),
-                'return_url': 'http://{}{}'.format(host,reverse('payment_done')),
-                'cancel_return': 'http://{}{}'.format(host,reverse('payment_cancelled')),
-            }
-            
-            global rec
-            rec = cantidad
 
-            form = PayPalPaymentsForm(initial=paypal_dict)
-            return render(request, 'saldo_procesar_pago.html', {'form': form})
-    else:
-        form = proyecto.forms.PaypalAmountForm()
-        return render(request, 'saldo_opciones.html', {'form':form})
-        
+def process_payment(request):
+    host = request.get_host()
+
+    paypal_dict = {
+        'business': settings.PAYPAL_RECEIVER_EMAIL,
+        'amount': '7',
+        'item_name': 'Bobis',
+        'currency_code': 'EUR',
+        'notify_url': 'http://{}{}'.format(host,reverse('paypal-ipn')),
+        'return_url': 'http://{}{}'.format(host,reverse('payment_done')),
+        'cancel_return': 'http://{}{}'.format(host,reverse('payment_cancelled')),
+    }
+
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    return render(request, 'process_payment.html', {'form': form})
+
 @csrf_exempt
 def payment_done(request):
-    global rec
-    o_user = User.objects.get(id=request.user.id)
-    cliente = Cliente.objects.get(user = o_user)
-    
-    cliente.saldo += rec
-    cliente.save()
-    return render(request, 'saldo_exito.html')
+    return render(request, 'payment_done.html')
 
 
 @csrf_exempt
 def payment_canceled(request):
-    return render(request, 'saldo_cancelado.html')
+    return render(request, 'payment_cancelled.html')
