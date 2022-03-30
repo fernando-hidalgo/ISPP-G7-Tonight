@@ -56,8 +56,9 @@ class EmpresaModelForm(ModelForm):
     class Meta:
         model = Empresa
         exclude = ('user',)
-        fields = ['tlf', "imagen"]
+        fields = ['tlf', "imagen", 'cif']
         labels = {
             'tlf': 'Número de teléfono',
             'imagen': 'Imagen',
+            'cif': 'CIF',
         }

@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
+from localflavor.es.models import ESIdentityCardNumberField
 
 import datetime
 # Create your models here.
@@ -18,6 +19,7 @@ class Cliente(models.Model):
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
     tlf = PhoneNumberField(unique = True)
+    cif = ESIdentityCardNumberField()
     imagen = models.ImageField(blank=True, upload_to='media/')
 
 class Empleado(models.Model):

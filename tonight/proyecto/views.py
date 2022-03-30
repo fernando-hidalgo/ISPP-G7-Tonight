@@ -14,6 +14,7 @@ from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
 from .forms import UserForm, ClienteModelForm, EmpresaModelForm
 from .models import Evento
+from django.utils import timezone
 import proyecto.qr
 import proyecto.entrada
 
@@ -25,8 +26,20 @@ def listar_eventos(request):
     return render(request,'listar_eventos.html', {"eventos":eventos})
 
 def listar_eventos_empleado(request, empleado_id): 
-    
-    return render(request,'empleado.html')
+    hayUsuario = User.objects.filter(id=request.user.id).exists()
+    if hayUsuario == True:
+        usuario = User.objects.get(id=request.user.id)
+        empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
+        if empleado_exists:
+            empleado = Empleado.objects.get(user = usuario)
+            eventos = Evento.objects.filter(empresa = empleado.empresa, fecha__range=[str(timezone.now()), "7777-07-07"])
+            return render(request,'empleado.html', {"eventos":eventos})
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        response = redirect('/error/')
+        return response
 
 def QR(request):
     proyecto.qr.init_qr()
@@ -295,6 +308,7 @@ def ver_evento(request, evento_id):
     no_log = True
     no_duenho = False
     es_duenho = False
+    es_empleado = False
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     print(request.user)
     if hay_evento == True:
@@ -305,14 +319,19 @@ def ver_evento(request, evento_id):
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
-            if cliente_exists:
+            empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
+            if empleado_exists:
+                es_empleado = True
+                evento = Evento.objects.get(id=evento_id)
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario})
+            elif cliente_exists:
                 no_duenho = True
                 evento = Evento.objects.get(id=evento_id)
-                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"user":usuario})
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario})
             elif empresa_exists:
                 evento = Evento.objects.get(id=evento_id)
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
-                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"user":usuario})
+                return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,"es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario})
     else:
         response = redirect('/error/')
         return response

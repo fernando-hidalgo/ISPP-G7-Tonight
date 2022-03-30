@@ -40,6 +40,8 @@
             <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/cliente/{{ user.id }}/'">
               <i class="bi bi-person-circle" style="font-size: 4rem; color: #A017E0;"></i>
             </button>
+            {% elif es_empleado %}
+            <button type="button" class="see-ticket-button text-white" onclick="location.href='#'">Escanear QR</button>
             {% endif %}
           </div>
         </div>
