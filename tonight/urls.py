@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
-from proyecto.views import ClientProfile, WelcomeClient, InicioVista, ErrorVista, BusinnessProfile, WelcomeBusiness, Entradas
+from proyecto.views import ClientProfile, WelcomeClient, InicioVista, ErrorVista, BusinnessProfile, WelcomeBusiness, Entradas, WelcomeVista, ClientCreate
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -29,7 +29,7 @@ urlpatterns = [
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
     path('eventos/crear', views.VistaCrearEvento.as_view()),
     path('qr', views.QR),
-    path('scan', views.scan)
+    path('scan', views.scan),
     
     #PAYPAL
     path('paypal/', include('paypal.standard.ipn.urls')),

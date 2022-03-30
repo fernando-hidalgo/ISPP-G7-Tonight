@@ -12,6 +12,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
+from .forms import UserForm, ClienteModelForm
 from .models import Evento
 import proyecto.qr
 import proyecto.entrada

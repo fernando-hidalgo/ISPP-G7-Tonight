@@ -8,3 +8,5 @@ qrcode
 dj-database-url
 opencv-python-headless
 django-paypal
+django-phonenumber-field[phonenumbers]
+Babel
