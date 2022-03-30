@@ -11,7 +11,11 @@
     <title>Document</title>
 </head>
 <body>
-    <p>Página para probar QRs</p>
-    <img src="{% static 'img/qrcode001.png' %}">
+    <p>Aquí tiene su QR para el evento:</p>
+    <div class="input-group mb-3">
+        <div style="margin: auto">
+          {{ svg|safe }}
+        </div>
+    </div>
 </body>
 </html>

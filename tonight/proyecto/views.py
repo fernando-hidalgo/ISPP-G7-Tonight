@@ -32,15 +32,25 @@ def listar_eventos(request):
     eventos = Evento.objects.all()
     return render(request,'listar_eventos.html', {"eventos":eventos})
 
-def QR(request):
-    proyecto.qr.init_qr()
-    return render(request,'qr.html')
+def QR(request, evento_id):
+    if request.user.id == None:
+        return redirect('/error/')
+    evento = get_object_or_404(Evento, id = evento_id)
+    user = User.objects.get(id = request.user.id)
+    cliente = Cliente.objects.get(user = user)
+    entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
+    if entrada_exists.count() > 0:
+        entrada = entrada_exists.first()
+        context = proyecto.qr.render_qr(evento, entrada)
+        return render(request, "qr.html", context=context)
+    else:
+        return redirect('/error/')
 
-def scan(request):
+def scan(request, evento_id):
+    evento = get_object_or_404(Evento, id = evento_id)
     if request.method == 'POST':
         print("funciona")
         data = request.POST.get('hash')
-        evento = Evento.objects.get(id=4)
         proyecto.entrada.exchange_entrada(data, evento)
         return HttpResponse(status=200)
     else:
@@ -190,7 +200,7 @@ def ver_evento(request, evento_id):
                 cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
                 entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
-                transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False)
+                transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N')
                 if entrada_exists.count() > 0:
                     entrada = entrada_exists.first()
                 if transaccion_exists.count() > 0:
@@ -199,7 +209,7 @@ def ver_evento(request, evento_id):
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
                     "es_duenho":es_duenho,"user":usuario, "has_entrada": entrada is not None,
-                     "en_venta": transaccion is not None})
+                     "hay_transaccion": transaccion is not None})
     else:
         response = redirect('/error/')
         return response
@@ -299,7 +309,7 @@ def cancelar_transaccion(request, evento_id):
     o_user = User.objects.get(id=request.user.id)
     evento = Evento.objects.get(id=evento_id)
     cliente = Cliente.objects.get(user = o_user)
-    transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, tipo = 'V', done = False).first()
+    transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N').first()
     proyecto.transacciones.cancelar_transaccion(transaccion)
     return redirect(ver_evento, evento_id=evento.id)
 

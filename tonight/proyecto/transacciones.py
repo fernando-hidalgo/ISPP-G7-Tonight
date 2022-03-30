@@ -40,9 +40,12 @@ def poner_venta(evento, cliente, fech):
     return
 
 def poner_compra(evento, cliente, fech):
-    transaccion = Transaccion.objects.create(tipo='C', fechaAudit=datetime.datetime.now(), fechaLimite=fech, evento=evento, cliente=cliente)
-    check_transacciones(transaccion)
-    return
+    if cliente.saldo - evento.precioEntrada >= 0:
+        transaccion = Transaccion.objects.create(tipo='C', fechaAudit=datetime.datetime.now(), fechaLimite=fech, evento=evento, cliente=cliente)
+        check_transacciones(transaccion)
+        return True
+    else:
+        return False
 
 def vender_entrada(entrada, fech):
     if entrada.status == 'A':

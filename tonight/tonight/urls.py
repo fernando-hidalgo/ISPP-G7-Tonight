@@ -28,8 +28,8 @@ urlpatterns = [
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
     path('eventos/crear', views.VistaCrearEvento.as_view()),
     path('eventos/<int:evento_id>/cancelar', views.cancelar_transaccion),
-    path('qr', views.QR),
-    path('scan', views.scan)
+    path('eventos/<int:evento_id>/qr', views.QR),
+    path('eventos/<int:evento_id>/scan', views.scan)
 ]
 
 if settings.DEBUG:

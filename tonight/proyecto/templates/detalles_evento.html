@@ -77,19 +77,28 @@
                     Eliminar</button>
                 <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/editar'">
                     Editar</button>
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/scan'">
+                    Escanear</button>
             {% elif no_duenho %}
                 {% if has_entrada %}
-                  {% if en_venta %}
+                  {% if hay_transaccion %}
                   <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/cancelar'">
                     Cancelar</button>
                   {% else %}
                   <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/vender'">
                     Vender</button>
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/qr'">
+                    Ver entrada</button>
                   {% endif %}
                 {% else %}
                     {% if evento.totalEntradas == 0 %}
-                      <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/orden_comprar'">
-                        Orden compra</button>
+                      {% if hay_transaccion %}
+                        <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/cancelar'">
+                          Cancelar</button>
+                      {% else %}
+                        <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/orden_comprar'">
+                          Ordenar compra</button>
+                      {% endif %}
                     {% else %}
                       <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/comprar'">
                       Comprar</button>

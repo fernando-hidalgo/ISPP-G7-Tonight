@@ -13,15 +13,18 @@ def generate_hash(key, msg):
     return result
 
 def create_entrada(cliente, evento):
-    cliente.saldo = cliente.saldo - evento.precioEntrada
-    cliente.save()
-    Entrada.objects.create(fechaCompra=datetime.date.today(), 
-        fechaCaducidad=evento.fecha + datetime.timedelta(days=1), 
-        estado='A',
-        cliente=cliente,
-        evento=evento,
-        hash=generate_hash(evento.salt, ",".join([str(evento.id), str(cliente.user.id)]))
-    )
+    if cliente.saldo - evento.precioEntrada >= 0:
+        cliente.saldo = cliente.saldo - evento.precioEntrada
+        cliente.save()
+        Entrada.objects.create(fechaCompra=datetime.date.today(), 
+            fechaCaducidad=evento.fecha + datetime.timedelta(days=1), 
+            estado='A',
+            cliente=cliente,
+            evento=evento,
+            hash=generate_hash(evento.salt, ",".join([str(evento.id), str(cliente.user.id)]))
+        )
+    else:
+        return False
     
 
 def exchange_entrada(data, evento):
@@ -29,10 +32,15 @@ def exchange_entrada(data, evento):
     que dicha entrada es valida y esta activa, se pasa a estado vendida y devuelve un okay"""
     entrada = proyecto.qr.verify_qr(data, evento)
     if entrada is not None:
-        if entrada.estado == 1:
-            entrada.estado = 3
+        if entrada.estado == 'A':
+            entrada.estado = 'U'
+            entrada.save()
             print("Entrada leida")
             return True
-    print("No se ha encontrado una entrada")
-    return False
+        else:
+            print("Esta entrada no está en estado Adquirida")
+            return False
+    else:
+        print("No se ha encontrado una entrada")
+        return False
 

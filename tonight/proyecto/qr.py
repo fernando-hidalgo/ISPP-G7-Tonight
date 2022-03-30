@@ -1,13 +1,25 @@
 import datetime
-from django.shortcuts import render, get_object_or_404
 import qrcode
+import qrcode.image.svg
 import cv2
 from proyecto.models import *
 from proyecto.entrada import generate_hash
+from io import BytesIO
+
 # Create your views here.
 key_event = "FFFF"
-path = 'static/img/qrcode001.png'
+path = 'static/img/'
 #TICKET QRS
+def render_qr(evento, entrada):
+    data = ",".join([evento.nombre, entrada.hash])
+    context = {}
+    factory = qrcode.image.svg.SvgImage
+    img = qrcode.make(data, image_factory=factory, box_size=20)
+    stream = BytesIO()
+    img.save(stream)
+    context["svg"] = stream.getvalue().decode()
+    return context
+
 def generate_qr(cliente, entrada, evento):
     """Datos a meter en el qr: 
     - Usuario (nombre)
@@ -28,7 +40,7 @@ def generate_qr(cliente, entrada, evento):
     qr.add_data(input_data)
     qr.make(fit=True)
     img = qr.make_image(fill='black', back_color='white')
-    img.save(path)
+    img.save(path + entrada.hash + '.png')
 
 def read_qr_cam():
     cap = cv2.VideoCapture(0)
