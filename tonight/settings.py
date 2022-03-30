@@ -80,12 +80,12 @@ WSGI_APPLICATION = 'tonight.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': 'tonight',
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'toNight',
         'USER': 'root',
         'PASSWORD': 'password',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '3306',
     }
 }
 if os.environ.get('GITHUB_WORKFLOW'):
