@@ -5,7 +5,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from pyexpat import model
 from distutils.command.upload import upload
-
+from django.utils import timezone
 import datetime
 # Create your models here.
 
@@ -54,6 +54,7 @@ class Transaccion(models.Model):
     TYPE = (
         ('V', 'Vender'),
         ('C', 'Comprar'),
+        ('N', 'Neutralizar')
     )
     tipo = models.CharField(max_length=1, choices=TYPE)
     fechaAudit = models.DateTimeField()

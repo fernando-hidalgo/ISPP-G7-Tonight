@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
-from proyecto.views import ClientProfile, InicioVista, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate
 from django.conf import settings
+from proyecto.views import ClientProfile, InicioVista, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -18,17 +18,16 @@ urlpatterns = [
     path('cliente/', ErrorVista.as_view()),
     path('empresa/', ErrorVista.as_view()),
     path('error/', ErrorVista.as_view()),
-    path('entrada/<id>/',Entradas.as_view()),
-    #path('entrada/<id>/vender/',Entradas.vender),
-    path('login/', LoginView.as_view(template_name='login.html')),
-    path('logout/', LogoutView.as_view(template_name='welcome.html')),
     path('eventos/<int:evento_id>', views.ver_evento),
     path('eventos/<int:evento_id>/borrar', views.borrar_evento),
+    path('eventos/<int:evento_id>/comprar', views.compra_directa),
+    path('eventos/<int:evento_id>/vender', views.vender),
+    path('eventos/<int:evento_id>/orden_comprar', views.orden_comprar),
     path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
     path('eventos/crear', views.VistaCrearEvento.as_view()),
-    path('qr', views.QR),
-    path('scan', views.scan),
-    
+    path('eventos/<int:evento_id>/cancelar', views.cancelar_transaccion),
+    path('eventos/<int:evento_id>/qr', views.QR),
+    path('eventos/<int:evento_id>/scan', views.scan)
     #PAYPAL
     path('paypal/', include('paypal.standard.ipn.urls')),
     #Form view, where user inputs amount to recharge
@@ -41,3 +40,5 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('login/', LoginView.as_view(template_name='login.html')),
+    path('logout/', LogoutView.as_view(template_name='welcome.html')),
