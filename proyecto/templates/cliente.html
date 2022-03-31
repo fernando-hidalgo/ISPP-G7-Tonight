@@ -17,7 +17,7 @@
     <section class="container">
       <div class="row">
         <div class="col-3">
-          <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/welcome_client/'">
+          <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick= history.back();>
             <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
           </button>
         </div>
@@ -60,6 +60,12 @@
             </div>
         </div>
       </div>
+
+      <div class="row" style= "margin-top: 3%;">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/cliente/{{user.id}}/saldo'">Recargar Saldo</button> 
+        </div>
+      </div>
     </section>
 
     <section class="container profile-tickets-list-card">
@@ -95,8 +101,3 @@
 
   </body>
 </html>
-      <div class="row" style= "margin-top: 3%;">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/cliente/{{user.id}}/saldo'">Recargar Saldo</button> 
-        </div>
-      </div>
