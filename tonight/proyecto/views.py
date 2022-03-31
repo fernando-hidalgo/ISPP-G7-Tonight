@@ -257,10 +257,10 @@ class VistaCrearEvento(CreateView):
         "descripcion",
         "ubicacion",
         "imagen",
-        "salt",
     ]
     def form_valid(self, form):
         form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        form.instance.salt = proyecto.qr.generate_salt()
         return super().form_valid(form)
 
 
