@@ -55,10 +55,17 @@
             </div>
 
             <div class="container party-infobox text-white">
-              <p>Teléfono: {{ empresa.tlf }}</p>
+              <p>Teléfono: {{ empresa.tlf.national_number }}</p>
             </div>
         </div>
       </div>
+      
+      <div class="row" style= "margin-top: 3%;">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/empleados/crear'">Crear empleado</button> 
+        </div>
+      </div>
+
       <div class="row" style= "margin-top: 3%;">
         <div class="container">
           <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/crear'">Crear evento</button> 
@@ -88,11 +95,4 @@
 
   </body>
 </html>
-      <div class="row" style= "margin-top: 3%;">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/empleados/crear'">Crear empleado</button> 
-        </div>
-      </div>
-            <div class="container party-infobox text-white">
-              <p>Teléfono: {{ empresa.tlf.national_number }}</p>
-            </div>
+            

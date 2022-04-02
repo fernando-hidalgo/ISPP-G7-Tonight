@@ -3,7 +3,7 @@ from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
-from proyecto.views import ClientProfile, InicioVista, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate
+from proyecto.views import ClientProfile, InicioVista, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
 from django.conf.urls.static import static
 
 urlpatterns = [

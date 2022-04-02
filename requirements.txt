@@ -10,3 +10,4 @@ opencv-python-headless
 django-paypal
 django-phonenumber-field[phonenumbers]
 Babel
+django-localflavor
