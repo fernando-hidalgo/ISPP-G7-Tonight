@@ -5,11 +5,15 @@ import cv2
 from proyecto.models import *
 from proyecto.entrada import generate_hash
 from io import BytesIO
+import secrets
 
 # Create your views here.
 key_event = "FFFF"
 path = 'static/img/'
 #TICKET QRS
+def generate_salt():
+    return secrets.token_hex(16)
+
 def render_qr(evento, entrada):
     data = ",".join([evento.nombre, entrada.hash])
     context = {}
