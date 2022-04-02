@@ -2,27 +2,25 @@ from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model, authenticate, login
-from proyecto.models import Cliente, Empresa, Evento, Entrada, Transaccion
+from proyecto.models import Cliente, Empresa, Evento, Entrada, Transaccion, Empleado
 from django.contrib.auth.models import User
 import json
-from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm, UserModelForm, ClienteModelForm
+from .forms import UserForm, ClienteModelForm, EmpresaModelForm
 from .models import Evento
+from django.utils import timezone
 import proyecto.qr
 import proyecto.entrada
 from proyecto.forms import PaypalAmountForm
 from hashlib import new
 from time import time
 from datetime import date, datetime
-from .models import Evento
-import proyecto.qr
-import proyecto.entrada
 import proyecto.transacciones
 import datetime
 from proyecto.forms import TransactionForm
@@ -64,6 +62,21 @@ def scan(request, evento_id):
         return HttpResponse(status=200)
     else:
         return render(request, 'scan.html')
+def listar_eventos_empleado(request, empleado_id): 
+    hayUsuario = User.objects.filter(id=request.user.id).exists()
+    if hayUsuario == True:
+        usuario = User.objects.get(id=request.user.id)
+        empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
+        if empleado_exists:
+            empleado = Empleado.objects.get(user = usuario)
+            eventos = Evento.objects.filter(empresa = empleado.empresa, fecha__range=[str(timezone.now()), "7777-07-07"])
+            return render(request,'empleado.html', {"eventos":eventos})
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        response = redirect('/error/')
+        return response
 
 class InicioVista(View):
     def get(self, request):
@@ -152,6 +165,84 @@ class ClientCreate(CreateView):
             return redirect('/login/')
         else:
             return render (request, 'crear_cliente.html', {'form': form, 'form2': form2})
+
+    def form_valid(self, form, form2):
+        form.save()
+        form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
+class EmpleadoCreate(CreateView):
+     # specify the model you want to use
+    model = Empleado
+    template_name="crear_empleado.html"
+    # specify the fields
+    form_class = UserForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpleadoCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        return context
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            empleado = Empleado()
+            empleado.user = form.save()
+            empleado.empresa = Empresa.objects.get(user = request.user)
+            print(request.user.id)
+            empleado.save()
+            return redirect('/empresa/' + str(request.user.id) + '/')
+        else:
+            return redirect('/error/')
+
+    def form_valid(self, form):
+        form.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        return redirect('/login/')
+
+class EmpresaCreate(CreateView):
+     # specify the model you want to use
+    model = Empresa
+    template_name="crear_empresa.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = EmpresaModelForm
+    success_url = "/login/"
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpresaCreate, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        if 'form2' not in context:
+            context['form2'] = self.second_form_class(self.request.GET)
+        return context
+        
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        form2 = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and form2.is_valid():
+            empresa = form2.save(commit=False)
+            usuario = form.save()
+            empresa.user = usuario
+            empresa.save()
+            empleado = Empleado()
+            empleado.empresa = empresa
+            usuario2 = User()
+            usuario2.username = 'empleado_'+empresa.user.username
+            usuario2.password = empresa.user.password
+            usuario2.email = empresa.user.email
+            usuario2.save()
+            empleado.user = usuario2
+            empleado.save()
+            return redirect('/login/')
+        else:
+            return render (request, 'crear_empresa.html', {'form': form, 'form2': form2})
 
     def form_valid(self, form, form2):
         form.save()

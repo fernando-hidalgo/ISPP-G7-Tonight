@@ -7,7 +7,7 @@ from pyexpat import model
 from distutils.command.upload import upload
 from django.utils import timezone
 import datetime
-# Create your models here.
+from localflavor.es.models import ESIdentityCardNumberField
 
 class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
@@ -17,12 +17,10 @@ class Cliente(models.Model):
 
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
-    tlf = models.PositiveIntegerField()
+    tlf = PhoneNumberField(unique = True)
+    cif = ESIdentityCardNumberField()
     imagen = models.ImageField(blank=True, upload_to='media/')
 
-class Empleado(models.Model):
-    user = models.OneToOneField(User, related_name='user_epld', on_delete=models.CASCADE)
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
 class Evento(models.Model):
     fecha = models.DateTimeField('Fecha', validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
@@ -62,3 +60,7 @@ class Transaccion(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='cliente_trans')
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='evento_trans', blank=True)
     done = models.BooleanField(default=False)
+
+class Empleado(models.Model):
+    user = models.OneToOneField(User, related_name='user_epld', on_delete=models.CASCADE)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)

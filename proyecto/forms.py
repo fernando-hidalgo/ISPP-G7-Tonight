@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
-from proyecto.models import Cliente
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from django import forms
+from proyecto.models import Cliente, Empresa
 
 class UserForm(UserCreationForm):
 
@@ -77,6 +77,20 @@ class ClienteModelForm(ModelForm):
         for field_name in ('tlf', 'imagen'):
             self.fields[field_name].help_text = ''
 
+class EmpresaModelForm(ModelForm):
+
+    tlf = PhoneNumberField(
+        widget = PhoneNumberPrefixWidget(initial='ES')
+    )
+    class Meta:
+        model = Empresa
+        exclude = ('user',)
+        fields = ['tlf', "imagen", 'cif']
+        labels = {
+            'tlf': 'Número de teléfono',
+            'imagen': 'Imagen',
+            'cif': 'CIF',
+        }
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'
