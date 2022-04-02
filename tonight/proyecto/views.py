@@ -245,7 +245,7 @@ class EmpresaCreate(CreateView):
             empleado.save()
             return redirect('/login/')
         else:
-            return redirect('/error/')
+            return render (request, 'crear_empresa.html', {'form': form, 'form2': form2})
 
     def form_valid(self, form, form2):
         form.save()

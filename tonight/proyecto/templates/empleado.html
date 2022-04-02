@@ -24,13 +24,15 @@
     <title>Lista de fiestas</title>
   </head>
   <body>
-    <section class="container">
 
-        <div class="col-6">
-          <img src="/media/media/Logo.png" alt="Logo" class="img-fluid"/>
-        </div>
-        
-    </section>
+      <div class="col-6">
+        <img src="/media/media/Logo.png" alt="Logo" class="img-fluid"/>
+      </div>
+      <div class="col-3">
+          <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/logout/'">
+            <i class="bi bi-backspace-reverse-fill" style="font-size: 4rem; color: #A017E0;"></i>
+          </button>
+      </div>
         
     {% for x in eventos %}
         <section class="container party-list-card text-white" style="margin-top: 5%;" onclick="location.href='/eventos/{{ x.id }}'"> 
