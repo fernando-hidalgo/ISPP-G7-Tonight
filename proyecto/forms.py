@@ -91,6 +91,13 @@ class EmpresaModelForm(ModelForm):
             'imagen': 'Imagen',
             'cif': 'CIF',
         }
+    
+    def clean_cif(self):
+        cif = self.cleaned_data.get('cif')
+        cif_str=str(cif)
+        if cif_str[:8].isdigit():
+            raise forms.ValidationError('No es un cif')
+        return cif
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'

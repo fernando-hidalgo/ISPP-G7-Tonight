@@ -23,7 +23,8 @@ class Empresa(models.Model):
 
 
 class Evento(models.Model):
-    fecha = models.DateTimeField('Fecha', validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
+    #fecha = models.DateTimeField('Fecha', validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
+    fecha = models.DateTimeField('Fecha')
     precioEntrada = models.PositiveIntegerField('Precio Entrada')
     totalEntradas = models.PositiveIntegerField('Total Entradas')
     nombre = models.CharField('Nombre', max_length=100)
@@ -32,6 +33,11 @@ class Evento(models.Model):
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
     imagen = models.ImageField('Imagen',blank=True, upload_to='media/')
+    STATUS = (
+        ('E', 'En curso'),
+        ('A', 'Acabado')
+    )
+    estado = models.CharField(max_length=1, choices=STATUS)
 
 class Entrada(models.Model):
     fechaCompra = models.DateTimeField()

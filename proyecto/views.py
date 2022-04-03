@@ -36,7 +36,7 @@ rec = 0
 
 # Create your views here.
 def listar_eventos(request): 
-    eventos = Evento.objects.all()
+    eventos = Evento.objects.filter(fecha__range=[str(timezone.now() + timezone.timedelta(hours=3)), "7777-07-07"])
     return render(request,'listar_eventos.html', {"eventos":eventos})
 
 def QR(request, evento_id):
@@ -62,14 +62,15 @@ def scan(request, evento_id):
         return HttpResponse(status=200)
     else:
         return render(request, 'scan.html')
-def listar_eventos_empleado(request, empleado_id): 
+
+def listar_eventos_empleado(request, id): 
     hayUsuario = User.objects.filter(id=request.user.id).exists()
     if hayUsuario == True:
         usuario = User.objects.get(id=request.user.id)
         empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
         if empleado_exists:
             empleado = Empleado.objects.get(user = usuario)
-            eventos = Evento.objects.filter(empresa = empleado.empresa, fecha__range=[str(timezone.now()), "7777-07-07"])
+            eventos = Evento.objects.filter(empresa = empleado.empresa, fecha__range=[str(timezone.now() + timezone.timedelta(hours=3)), "7777-07-07"])
             return render(request,'empleado.html', {"eventos":eventos})
         else:
             response = redirect('/error/')
@@ -88,11 +89,15 @@ class InicioVista(View):
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
             if empresa_exists:
                 response = redirect('/empresa/{}/'.format(request.user.id))
                 return response
             if cliente_exists:
                 response = redirect('/eventos/')
+                return response
+            if empleado_exists:
+                response = redirect('/empleados/{}/'.format(request.user.id))
                 return response
             else:
                 response = redirect('/admin/')
@@ -286,10 +291,10 @@ def ver_evento(request, evento_id):
     no_log = True
     no_duenho = False
     es_duenho = False
+    es_empleado = False
     entrada = None
     transaccion = None
     hay_evento = Evento.objects.filter(id=evento_id).exists()
-    print(request.user)
     if hay_evento == True:
         if request.user.id==None:
             response = redirect('/error/')
@@ -298,7 +303,16 @@ def ver_evento(request, evento_id):
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+            empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
             evento = Evento.objects.get(id=evento_id)
+            if (evento.fecha + timezone.timedelta(hours=3) < timezone.now()) or evento.estado == 'A':
+                evento.estado = 'A'
+                evento.save()
+                return redirect('/error/')
+            if empleado_exists:
+                empleado = Empleado.objects.get(user = usuario)
+                if empleado.empresa ==  evento.empresa:
+                    es_empleado = True
             if cliente_exists:
                 cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
@@ -311,7 +325,7 @@ def ver_evento(request, evento_id):
             elif empresa_exists:
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
-                    "es_duenho":es_duenho,"user":usuario, "has_entrada": entrada is not None,
+                    "es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario, "has_entrada": entrada is not None,
                      "hay_transaccion": transaccion is not None})
     else:
         response = redirect('/error/')
@@ -362,6 +376,7 @@ class VistaCrearEvento(CreateView):
     ]
     def form_valid(self, form):
         form.instance.empresa = Empresa.objects.get(user =self.request.user)
+        form.instance.estado = 'E'
         form.instance.salt = proyecto.qr.generate_salt()
         return super().form_valid(form)
 
