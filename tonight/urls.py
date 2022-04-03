@@ -10,7 +10,6 @@ urlpatterns = [
     path('', WelcomeVista.as_view()),
     path('eventos/', views.listar_eventos, name='payment_done'),
     path('admin/', admin.site.urls),
-    # path('welcome/', WelcomeVista.as_view()),
     path('crear_cliente/', ClientCreate.as_view()),
     path('inicio/', InicioVista.as_view()),
     path('cliente/<id>/', ClientProfile.as_view()),
@@ -31,6 +30,7 @@ urlpatterns = [
     path('eventos/<int:evento_id>/qr', views.QR),
     path('eventos/<int:evento_id>/scan', views.scan),
     path('empleados/<id>/', views.listar_eventos_empleado),
+    path('empleados/crear', EmpleadoCreate.as_view()),
     path('crear_empresa/', EmpresaCreate.as_view()),
     #PAYPAL
     path('paypal/', include('paypal.standard.ipn.urls')),

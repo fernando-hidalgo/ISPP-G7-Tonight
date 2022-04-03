@@ -205,7 +205,7 @@ class EmpleadoCreate(CreateView):
             empleado.save()
             return redirect('/empresa/' + str(request.user.id) + '/')
         else:
-            return redirect('/error/')
+            return render (request, 'crear_empleado.html', {'form': form})
 
     def form_valid(self, form):
         form.save()
@@ -381,6 +381,9 @@ class VistaCrearEvento(CreateView):
         form.instance.empresa = Empresa.objects.get(user =self.request.user)
         form.instance.estado = 'E'
         form.instance.salt = proyecto.qr.generate_salt()
+        if form.instance.totalEntradas < 1:
+            form.add_error(form.instance.totalEntradas, 'Debe haber al menos una entrada a la venta')
+            return render (self.request, 'crear_evento.html', {'form': form})
         return super().form_valid(form)
 
     def get_success_url(self):

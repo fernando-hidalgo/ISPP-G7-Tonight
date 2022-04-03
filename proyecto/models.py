@@ -18,7 +18,7 @@ class Cliente(models.Model):
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
     tlf = PhoneNumberField(unique = True)
-    cif = ESIdentityCardNumberField()
+    cif = ESIdentityCardNumberField(unique = True)
     imagen = models.ImageField(blank=True, upload_to='media/')
 
 
