@@ -90,10 +90,13 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
+
             if empresa_exists:
                 response = redirect('/empresa/{}/'.format(request.user.id))
                 return response
             if cliente_exists:
+                cliente = Cliente.objects.get(user = usuario)
+                proyecto.entrada.check_dates(cliente)
                 response = redirect('/eventos/')
                 return response
             if empleado_exists:
