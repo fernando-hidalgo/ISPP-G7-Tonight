@@ -1,3 +1,4 @@
+from django.forms import EmailField
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
 from django.utils import timezone
