@@ -7,21 +7,23 @@ import proyecto.entrada
 def make_transaccion(tr_compradora, tr_vendedora):
     print("Se esta haciendo el intercambio")
     entrada = Entrada.objects.get(evento = tr_compradora.evento, cliente = tr_vendedora.cliente)
+    evento = entrada.evento
+    evento.totalEntradas = 1
+    evento.save()
+    print(evento.totalEntradas)
+    proyecto.entrada.create_entrada(tr_compradora.cliente, evento)
     entrada.estado = 'V'
     tr_vendedora.cliente.saldo += tr_vendedora.evento.precioEntrada
     tr_compradora.done = True
     tr_vendedora.done = True
     tr_compradora.save()
     tr_vendedora.save()
-    evento = entrada.evento
-    print(evento.totalEntradas)
-    evento.totalEntradas = 1
+    evento.totalEntradas = 0
     evento.save()
     entrada.save()
     print(evento.totalEntradas)
     print(evento)
     print(tr_vendedora.evento)
-    proyecto.entrada.create_entrada(tr_compradora.cliente, tr_vendedora.evento)
     return
 
 def check_transacciones(transaccion):
