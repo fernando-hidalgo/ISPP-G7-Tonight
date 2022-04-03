@@ -1,4 +1,6 @@
 from urllib import request
+from django import forms
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model, authenticate, login
@@ -386,6 +388,9 @@ def vender(request, evento_id):
             dia = form.cleaned_data["dia"]
             hora = form.cleaned_data["hora"]
             fechLimite = datetime.datetime.combine(dia,hora)
+            if fechLimite < datetime.datetime.now() or fechLimite > evento.fecha:
+                messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
+                return redirect("/eventos/"+str(evento.id)+"/vender")
             cliente = Cliente.objects.get(user = usuario)
             poner_venta(evento, cliente, fechLimite)
         return redirect(ver_evento, evento_id=evento.id)
@@ -402,6 +407,9 @@ def orden_comprar(request, evento_id):
             dia = form.cleaned_data["dia"]
             hora = form.cleaned_data["hora"]
             fechLimite = datetime.datetime.combine(dia,hora)
+            if fechLimite < datetime.datetime.now() or fechLimite > evento.fecha:
+                messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
+                return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
             cliente = Cliente.objects.get(user = usuario)
             poner_compra(evento, cliente, fechLimite)
         return redirect(ver_evento, evento_id=evento.id)

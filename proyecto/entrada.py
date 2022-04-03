@@ -13,6 +13,8 @@ def generate_hash(key, msg):
     return result
 
 def create_entrada(cliente, evento):
+    print("Hacemos entrada")
+    print(evento.totalEntradas)
     if evento.totalEntradas > 0:
         if cliente.saldo - evento.precioEntrada >= 0:
             cliente.saldo = cliente.saldo - evento.precioEntrada
