@@ -23,8 +23,7 @@ class Empresa(models.Model):
 
 
 class Evento(models.Model):
-    #fecha = models.DateTimeField('Fecha', validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
-    fecha = models.DateTimeField('Fecha')
+    fecha = models.DateTimeField('Fecha', validators=[MinValueValidator(timezone.now() + timezone.timedelta(days=1))])
     precioEntrada = models.PositiveIntegerField('Precio Entrada')
     totalEntradas = models.PositiveIntegerField('Total Entradas')
     nombre = models.CharField('Nombre', max_length=100)
