@@ -13,17 +13,25 @@ def generate_hash(key, msg):
     return result
 
 def create_entrada(cliente, evento):
-    if cliente.saldo - evento.precioEntrada >= 0:
-        cliente.saldo = cliente.saldo - evento.precioEntrada
-        cliente.save()
-        Entrada.objects.create(fechaCompra=datetime.date.today(), 
-            fechaCaducidad=evento.fecha + datetime.timedelta(days=1), 
-            estado='A',
-            cliente=cliente,
-            evento=evento,
-            hash=generate_hash(evento.salt, ",".join([str(evento.id), str(cliente.user.id)]))
-        )
+    if evento.totalEntradas > 0:
+        if cliente.saldo - evento.precioEntrada >= 0:
+            cliente.saldo = cliente.saldo - evento.precioEntrada
+            evento.totalEntradas -= 1
+            evento.save()
+            cliente.save()
+            Entrada.objects.create(fechaCompra=datetime.date.today(), 
+                fechaCaducidad=evento.fecha + datetime.timedelta(days=1), 
+                estado='A',
+                cliente=cliente,
+                evento=evento,
+                hash=generate_hash(evento.salt, ",".join([str(evento.id), str(cliente.user.id)]))
+            )
+            return True
+        else:
+            print("No tienes saldo")
+            return False
     else:
+        print("No hay entradas disponibles")
         return False
     
 
