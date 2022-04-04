@@ -6,6 +6,7 @@ from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from django import forms
 from proyecto.models import Cliente, Empresa, Evento
 import datetime
+from django.forms import TextInput
 
 class UserForm(UserCreationForm):
 
@@ -55,9 +56,7 @@ class UserModelForm(ModelForm):
 
         
 class ClienteModelForm(ModelForm):
-    tlf = PhoneNumberField(
-        widget = PhoneNumberPrefixWidget(initial='ES')
-    )
+    tlf = PhoneNumberField(widget = PhoneNumberPrefixWidget(initial='ES'))
     class Meta:
         model = Cliente
         exclude = ('user', 'saldo')
@@ -84,12 +83,16 @@ class EmpresaModelForm(ModelForm):
     class Meta:
         model = Empresa
         exclude = ('user',)
-        fields = ['tlf', "imagen", 'cif']
+        fields = ['tlf','cif', "imagen",]
         labels = {
             'tlf': 'Número de teléfono',
             'imagen': 'Imagen',
             'cif': 'CIF',
         }
+    def __init__(self, *args, **kwargs):
+        super(EmpresaModelForm, self).__init__(*args, **kwargs)
+        self.fields['imagen'].required = True
+        self.fields['imagen'].help_text = ''
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'
@@ -143,8 +146,8 @@ def repeated_ongoing_place(value):
 class FiestaForm(ModelForm):
     #dia = forms.DateField(widget=DatePickerInput, label="Día", validators=[present_or_future_date])
     #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
-    precioEntrada = forms.IntegerField(widget=NumberInput, label="Precio", validators=[above_zero])
-    totalEntradas = forms.IntegerField(widget=NumberInput, label="Total Entradas", validators=[above_zero])
+    precioEntrada = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Precio", validators=[above_zero])
+    totalEntradas = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Total Entradas", validators=[above_zero])
     nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name])
     descripcion = forms.CharField(widget=forms.Textarea, label="Descripción")
     ubicacion = forms.CharField(label="Ubicación", validators=[repeated_ongoing_place])
@@ -179,13 +182,19 @@ def repeated_ongoing_place_ignore_self(value):
 class FiestaEditForm(ModelForm):
     #dia = forms.DateField(widget=DatePickerInput, label="Día", validators=[present_or_future_date])
     #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
-    precioEntrada = forms.IntegerField(widget=NumberInput, label="Precio", validators=[above_zero])
-    totalEntradas = forms.IntegerField(widget=NumberInput, label="Total Entradas", validators=[above_zero])
+    precioEntrada = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Precio", validators=[above_zero])
+    totalEntradas = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Total Entradas", validators=[above_zero])
     nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name_ignore_self])
     descripcion = forms.CharField(widget=forms.Textarea, label="Descripción")
     ubicacion = forms.CharField(label="Ubicación", validators=[repeated_ongoing_place_ignore_self])
-    imagen = forms.ImageField(widget=forms.FileInput(), label="Imágen")
     
     class Meta:
         model = Evento
         exclude = ('salt','latitud','longitud','empresa')
+        fields = ["fecha","precioEntrada","totalEntradas","nombre","descripcion","ubicacion", "imagen",]
+        labels = {
+            'imagen': 'Imagen',
+        }
+        widgets = {
+            'fecha': TextInput(attrs={'placeholder': 'YYYY-MM-DD HH:MM'}),
+        }

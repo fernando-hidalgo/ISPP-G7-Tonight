@@ -5,15 +5,6 @@
     <div class="editar_evento" style="position:relative">
           <form method="post" enctype="multipart/form-data"> 
             {% csrf_token %}
-            <script type="text/javascript">
-                $(function() {
-                    $('#id_fecha').datetimepicker({
-                        locale: 'es',
-                        viewMode: 'days',
-                        format: 'YYYY-MM-DD HH:mm'
-                    });
-                });
-            </script>
             {{ form.as_p }}
             <input type="submit" value="Editar"> 
         </form> 

@@ -16,13 +16,13 @@ class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
     saldo = models.PositiveIntegerField()
     tlf = PhoneNumberField(unique = True)
-    imagen = models.ImageField(blank=True, upload_to='media/')
+    imagen = models.ImageField(upload_to='media/')
 
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
     tlf = PhoneNumberField(unique = True)
     cif = ESIdentityCardNumberField()
-    imagen = models.ImageField(blank=True, upload_to='media/')
+    imagen = models.ImageField(upload_to='media/')
 
 
 class Evento(models.Model):
@@ -34,7 +34,7 @@ class Evento(models.Model):
     ubicacion = models.CharField('Ubicación', max_length=100)
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
-    imagen = models.ImageField('Imagen',blank=True, upload_to='media/')
+    imagen = models.ImageField('Imagen', upload_to='media/')
     latitud= models.FloatField('Latitud')
     longitud= models.FloatField('Longitud')
 

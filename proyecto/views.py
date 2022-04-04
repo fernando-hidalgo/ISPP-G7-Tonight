@@ -151,7 +151,7 @@ class ClientProfile(View):
             return response
 
 class ClientCreate(CreateView):
-     # specify the model you want to use
+    # specify the model you want to use
     model = Cliente
     template_name="crear_cliente.html"
     # specify the fields
@@ -188,7 +188,7 @@ class ClientCreate(CreateView):
         return redirect('/login/')
 
 class EmpleadoCreate(CreateView):
-     # specify the model you want to use
+    # specify the model you want to use
     model = Empleado
     template_name="crear_empleado.html"
     # specify the fields
@@ -210,7 +210,7 @@ class EmpleadoCreate(CreateView):
             empleado.save()
             return redirect('/empresa/' + str(request.user.id) + '/')
         else:
-            return redirect('/error/')
+            return render (request, 'crear_empleado.html', {'form': form})
 
     def form_valid(self, form):
         form.save()
