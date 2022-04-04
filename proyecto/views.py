@@ -451,7 +451,7 @@ def vender(request, evento_id):
                 messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
                 return redirect("/eventos/"+str(evento.id)+"/vender")
             cliente = Cliente.objects.get(user = usuario)
-            poner_venta(evento, cliente, fechLimite)
+            poner_venta(request, evento, cliente, fechLimite)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         form = proyecto.forms.TransactionForm()
@@ -470,7 +470,7 @@ def orden_comprar(request, evento_id):
                 messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
                 return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
             cliente = Cliente.objects.get(user = usuario)
-            poner_compra(evento, cliente, fechLimite)
+            poner_compra(request, evento, cliente, fechLimite)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         form = proyecto.forms.TransactionForm()
@@ -488,7 +488,7 @@ def compra_directa(request, evento_id):
     o_user = User.objects.get(id=request.user.id)
     cliente = Cliente.objects.get(user = o_user)
     evento = Evento.objects.get(id=evento_id)
-    create_entrada(cliente,evento)
+    create_entrada(request, cliente,evento)
     return redirect(ver_evento, evento_id=evento.id)
 
 def recargar_saldo(request, id):

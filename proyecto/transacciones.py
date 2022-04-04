@@ -3,15 +3,17 @@ from asyncio import events
 from proyecto.models import *
 import datetime
 import proyecto.entrada
+from django.contrib import messages
 
-def make_transaccion(tr_compradora, tr_vendedora):
+
+def make_transaccion(request, tr_compradora, tr_vendedora):
     print("Se esta haciendo el intercambio")
     entrada = Entrada.objects.get(evento = tr_compradora.evento, cliente = tr_vendedora.cliente)
     evento = entrada.evento
     evento.totalEntradas = 1
     evento.save()
     print(evento.totalEntradas)
-    proyecto.entrada.create_entrada(tr_compradora.cliente, evento)
+    proyecto.entrada.create_entrada(request, tr_compradora.cliente, evento)
     entrada.estado = 'V'
     tr_vendedora.cliente.saldo += tr_vendedora.evento.precioEntrada
     tr_compradora.done = True
@@ -26,13 +28,13 @@ def make_transaccion(tr_compradora, tr_vendedora):
     print(tr_vendedora.evento)
     return
 
-def check_transacciones(transaccion):
+def check_transacciones(request, transaccion):
     caduca_transacciones()
     if transaccion.tipo == 'V':
         transacciones = Transaccion.objects.filter(evento = transaccion.evento, tipo = 'C', done=False)
         if transacciones.count() > 0:
             transaccion_select = Transaccion.objects.get(id=transacciones.first().id)
-            make_transaccion(transaccion_select, transaccion)
+            make_transaccion(request, transaccion_select, transaccion)
     else:
         print("Mirando si hay transacciones en venta para este evento")
         transacciones = Transaccion.objects.filter(evento = transaccion.evento, tipo = 'V', done=False)
@@ -40,38 +42,38 @@ def check_transacciones(transaccion):
         if transacciones.count() > 0:
             print("Encontrada transaccion de venta para esta compra")
             transaccion_select = Transaccion.objects.get(id=transacciones.first().id) 
-            make_transaccion(transaccion, transaccion_select)
+            make_transaccion(request, transaccion, transaccion_select)
     return
 
-def poner_venta(evento, cliente, fech):
+def poner_venta(request, evento, cliente, fech):
     """En caso de estar adquirida creamos una transacción y pasamos a el estado En venta"""
     entrada = Entrada.objects.filter(cliente = cliente, evento = evento).first()
     if(entrada.estado == 'A'):
         transaccion = Transaccion.objects.create(tipo='V', fechaAudit=datetime.datetime.now(), fechaLimite=fech, evento=evento, cliente=cliente)
         entrada.estado = 'E'
         entrada.save()
-        check_transacciones(transaccion)
+        check_transacciones(request, transaccion)
     return
 
-def poner_compra(evento, cliente, fech):
+def poner_compra(request, evento, cliente, fech):
     if cliente.saldo - evento.precioEntrada >= 0:
         if evento.estado == 'A':
-            print("Este evento ya ha acabado")
+            messages.info(request, 'Este evento ya ha acabado')
             return False
         else:
             transaccion = Transaccion.objects.create(tipo='C', fechaAudit=datetime.datetime.now(), fechaLimite=fech, evento=evento, cliente=cliente)
-            check_transacciones(transaccion)
+            check_transacciones(request, transaccion)
             return True
     else:
-        print("No tienes saldo")
+        messages.info(request, 'No tienes saldo disponible!')
         return False
 
-def vender_entrada(entrada, fech):
+def vender_entrada(request, entrada, fech):
     if entrada.status == 'A':
         entrada.status = 'E'
-        poner_venta(entrada.evento, entrada.cliente, fech)
+        poner_venta(request, entrada.evento, entrada.cliente, fech)
     else:
-        print("No se puedes poner a la venta entradas que ya estan caducadas, usadas o vendidas")
+        messages.info(request, 'No se puedes poner a la venta entradas que ya estan caducadas, usadas o vendidas!')
     
 def cancelar_transaccion(trs):
     caduca_transacciones()
