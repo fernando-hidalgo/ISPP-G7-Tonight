@@ -73,5 +73,13 @@
     <input type="radio" name="options" value="2" autocomplete="off"> Back Camera
   </label>
 </div>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+      <script>alert("{{ message }}")</script>
+    {% endfor %}
+</ul>
+{% endif %}
 </body>
 </html>

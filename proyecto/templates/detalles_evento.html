@@ -9,6 +9,13 @@
     </section>
 
     <section class="container">
+      {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+            <script>alert("{{ message }}")</script>
+          {% endfor %}
+      </ul>
+      {% endif %}
       <div class="row">
         <h1 class="party-title">{{evento.nombre}}</h1>
       </div>
