@@ -32,7 +32,49 @@ class EmpresaTestCase(TransactionTestCase):
     def test_tlf_positivo(self):
         empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242')
         empresa.save()
-        self.assertEqual(Empresa.objects.count(), 1)   
+        self.assertEqual(Empresa.objects.count(), 1) 
+
+    def test_nif_positivo(self):
+        empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='09853118X')
+        empresa.save()
+        self.assertEqual(Empresa.objects.count(), 1) 
+
+    def test_cif_positivo(self):
+        empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
+        empresa.save()
+        self.assertEqual(Empresa.objects.count(), 1)  
+
+    def test_usuario_vacio(self):
+        try:
+            empresa = Empresa(tlf='+41524204242', cif='H71336523')
+        except DataError as e:
+         self.assertIn("Column 'user_id' cannot be null", str(e))
+
+    def test_tlf_vacio(self):
+        try:
+            empresa = Empresa(user=User.objects.get(username='admin'), cif='H71336523')
+        except DataError as e:
+         self.assertIn("Column 'tlf' cannot be null", str(e))
+
+    def test_cif_vacio(self):
+        try:
+            empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242')
+        except DataError as e:
+         self.assertIn("Column 'cif' cannot be null", str(e))
+    
+    def test_cif_muy_grande(self):
+        empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='99999999999A')
+        try:
+            empresa.save()
+        except DataError as e:
+         self.assertIn('Data too long for column', str(e))
+
+    def test_cif_formato_incorrecto(self):
+        empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='xfrt47')
+        try:
+            empresa.save()
+        except DataError as e:
+         self.assertIn('Data too long for column', str(e))
 
     def test_usuario_duplicado(self):
         empresa1 = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242')
@@ -42,6 +84,28 @@ class EmpresaTestCase(TransactionTestCase):
             empresa2.save()
         except IntegrityError as e:
             self.assertIn('Duplicate entry', str(e))
+
+    def test_tlf_duplicado(self):
+        usuario = User(username='pablo', is_staff=True,  is_superuser=True, first_name='pablo', last_name='last_name_admin', email='pablo@gmail.com')
+        usuario.save()
+        empresa1 = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242')
+        empresa1.save()
+        empresa2 = Empresa(user=User.objects.get(username='pablo'), tlf='+41524204242')
+        try:
+            empresa2.save()
+        except IntegrityError as e:
+            self.assertIn('Duplicate entry', str(e))
+
+    # def test_cif_duplicado(self):
+    #     usuario = User(username='pablo', is_staff=True,  is_superuser=True, first_name='pablo', last_name='last_name_admin', email='pablo@gmail.com')
+    #     usuario.save()
+    #     empresa1 = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
+    #     empresa1.save()
+    #     empresa2 = Empresa(user=User.objects.get(username='pablo'), tlf='+41524204241', cif='H71336523')
+    #     try:
+    #         empresa2.save()
+    #     except IntegrityError as e:
+    #         self.assertIn('Duplicate entry', str(e))
 
     def test_tlf_negativo(self):
         empresa = Empresa(user=User.objects.get(username='admin'), tlf='-41524204242')
@@ -58,7 +122,13 @@ class EmpresaTestCase(TransactionTestCase):
         except DataError as e:
          self.assertIn('Out of range value for column', str(e))
 
-
+    def test_borrar_empresa(self):
+        empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
+        empresa.save()
+        self.assertEqual(Empresa.objects.count(), 1)
+        usuario = User.objects.get(id=1)
+        usuario.delete()
+        self.assertEqual(Empresa.objects.count(), 0)
     
 class SeleniumTestCase(StaticLiveServerTestCase):
 
