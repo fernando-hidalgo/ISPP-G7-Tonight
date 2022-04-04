@@ -1,6 +1,6 @@
 import datetime
 from django.shortcuts import render, get_object_or_404
-from proyecto.models import *
+from proyecto.models import Entrada
 import hashlib
 import binascii
 import hmac

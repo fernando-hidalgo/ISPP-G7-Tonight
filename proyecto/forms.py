@@ -155,8 +155,6 @@ def repeated_ongoing_place(value):
     return value
     
 class FiestaForm(ModelForm):
-    #dia = forms.DateField(widget=DatePickerInput, label="Día", validators=[present_or_future_date])
-    #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
     precioEntrada = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Precio", validators=[above_zero])
     totalEntradas = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Total Entradas", validators=[above_zero])
     nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name])
@@ -194,8 +192,6 @@ def repeated_ongoing_place_ignore_self(value):
     return value
         
 class FiestaEditForm(ModelForm):
-    #dia = forms.DateField(widget=DatePickerInput, label="Día", validators=[present_or_future_date])
-    #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
     precioEntrada = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Precio", validators=[above_zero])
     totalEntradas = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Total Entradas", validators=[above_zero])
     nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name_ignore_self])
