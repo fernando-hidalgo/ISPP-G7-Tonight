@@ -35,7 +35,7 @@ from django.urls import reverse
 from geopy.geocoders import Nominatim
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 User = get_user_model()
 rec = 0
@@ -239,12 +239,15 @@ class ClientCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
-class EmpleadoCreate(LoginRequiredMixin, CreateView):
+class EmpleadoCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     # specify the model you want to use
     model = Empleado
     template_name="crear_empleado.html"
     # specify the fields
-    form_class = UserForm    
+    form_class = UserForm
+    
+    def test_func(self):
+        return Empresa.objects.filter(user = self.request.user.id)
 
     def get_context_data(self, **kwargs):
         context = super(EmpleadoCreate, self).get_context_data(**kwargs)
@@ -279,7 +282,7 @@ class EmpresaCreate(CreateView):
     form_class = UserForm
     second_form_class = EmpresaModelForm
     success_url = "/login/"
-
+    
     def get_context_data(self, **kwargs):
         context = super(EmpresaCreate, self).get_context_data(**kwargs)
         if 'form' not in context:
@@ -417,12 +420,15 @@ def borrar_evento(request, evento_id):
         return redirect('/')
         
 
-class VistaEditarEvento(LoginRequiredMixin, UpdateView):
+class VistaEditarEvento(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     # specify the model you want to use
     model = Evento
     template_name="editar_evento.html"
     # specify the fields
-    form_class = FiestaEditForm    
+    form_class = FiestaEditForm
+    
+    def test_func(self):
+        return Empresa.objects.filter(user = self.request.user.id)
     
     def form_valid(self, form):
         #Generar Salt
