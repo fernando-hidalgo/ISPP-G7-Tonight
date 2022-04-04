@@ -382,7 +382,7 @@ def ver_evento(request, evento_id):
             if cliente_exists:
                 cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
-                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
+                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento, estado = 'A')
                 transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N')
                 if entrada_exists.count() > 0:
                     entrada = entrada_exists.first()
