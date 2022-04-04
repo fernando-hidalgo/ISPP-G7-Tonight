@@ -3,14 +3,14 @@ from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
-from proyecto.views import ClientProfile, InicioVista, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
+from proyecto.views import ClientProfile, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('', WelcomeVista.as_view()),
     path('eventos/', views.listar_eventos, name='payment_done'),
+    path('eventosmapa/', views.mapa_eventos),
     path('admin/', admin.site.urls),
-    # path('welcome/', WelcomeVista.as_view()),
     path('crear_cliente/', ClientCreate.as_view()),
     path('inicio/', InicioVista.as_view()),
     path('cliente/<id>/', ClientProfile.as_view()),
@@ -25,8 +25,8 @@ urlpatterns = [
     path('eventos/<int:evento_id>/comprar', views.compra_directa),
     path('eventos/<int:evento_id>/vender', views.vender),
     path('eventos/<int:evento_id>/orden_comprar', views.orden_comprar),
-    path('eventos/<pk>/editar', views.VistaEditarEvento.as_view()),
-    path('eventos/crear', views.VistaCrearEvento.as_view()),
+    path('eventos/<pk>/editar', VistaEditarEvento.as_view()),
+    path('eventos/crear', views.crear_fiesta),
     path('eventos/<int:evento_id>/cancelar', views.cancelar_transaccion),
     path('eventos/<int:evento_id>/qr', views.QR),
     path('eventos/<int:evento_id>/scan', views.scan),

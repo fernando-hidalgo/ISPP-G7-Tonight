@@ -114,4 +114,12 @@ select{
 
 input[name="tlf_1"] {
     margin-left: 6%;
+}
+
+.error-description{
+    width: 100%;
+    font-size: 6vw !important;
+    margin-top: 1%;
+    padding: 5%;
+    text-align:center;
   }

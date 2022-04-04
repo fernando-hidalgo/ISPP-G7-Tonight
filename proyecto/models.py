@@ -9,6 +9,9 @@ from django.utils import timezone
 import datetime
 from localflavor.es.models import ESIdentityCardNumberField
 
+#Unique mail
+User._meta.get_field('email')._unique = True
+
 class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
     saldo = models.PositiveIntegerField()
@@ -32,6 +35,8 @@ class Evento(models.Model):
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
     imagen = models.ImageField('Imagen',blank=True, upload_to='media/')
+    latitud= models.FloatField('Latitud')
+    longitud= models.FloatField('Longitud')
 
 class Entrada(models.Model):
     fechaCompra = models.DateTimeField()

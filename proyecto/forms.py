@@ -4,7 +4,8 @@ from django.forms import ModelForm
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from django import forms
-from proyecto.models import Cliente, Empresa
+from proyecto.models import Cliente, Empresa, Evento
+import datetime
 
 class UserForm(UserCreationForm):
 
@@ -54,7 +55,6 @@ class UserModelForm(ModelForm):
 
         
 class ClienteModelForm(ModelForm):
-
     tlf = PhoneNumberField(
         widget = PhoneNumberPrefixWidget(initial='ES')
     )
@@ -78,7 +78,6 @@ class ClienteModelForm(ModelForm):
             self.fields[field_name].help_text = ''
 
 class EmpresaModelForm(ModelForm):
-
     tlf = PhoneNumberField(
         widget = PhoneNumberPrefixWidget(initial='ES')
     )
@@ -110,3 +109,83 @@ class DateTimePickerInput(forms.DateTimeInput):
 class TransactionForm(forms.Form):
     dia = forms.DateField(widget=DatePickerInput, label="Día")
     hora = forms.TimeField(widget=TimePickerInput, label="Hora")
+
+def present_or_future_date(value):
+    if value < datetime.date.today():
+        raise forms.ValidationError("Viajar en el tiempo no es una opción!")
+    return value
+
+def above_zero(value):
+    if value <= 0:
+        raise forms.ValidationError("Este campo debe ser mayor que 0!")
+    return value
+
+def repeated_ongoing_name(value):
+    repeated = False
+    eventos = Evento.objects.all()
+    for evento in eventos:
+        if(evento.nombre == value): #Queda añadir el estado
+            repeated = True
+    if(repeated):
+        raise forms.ValidationError("Ya hay una fiesta en curso con ese nombre!")
+    return value
+
+def repeated_ongoing_place(value):
+    repeated = False
+    eventos = Evento.objects.all()
+    for evento in eventos:
+        if(evento.ubicacion == value):  #Queda añadir el estado
+            repeated = True
+    if(repeated):
+        raise forms.ValidationError("Ya hay una fiesta en curso aquí!")
+    return value
+    
+class FiestaForm(ModelForm):
+    #dia = forms.DateField(widget=DatePickerInput, label="Día", validators=[present_or_future_date])
+    #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
+    precioEntrada = forms.IntegerField(widget=NumberInput, label="Precio", validators=[above_zero])
+    totalEntradas = forms.IntegerField(widget=NumberInput, label="Total Entradas", validators=[above_zero])
+    nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name])
+    descripcion = forms.CharField(widget=forms.Textarea, label="Descripción")
+    ubicacion = forms.CharField(label="Ubicación", validators=[repeated_ongoing_place])
+    imagen = forms.ImageField(widget=forms.FileInput(), label="Imágen")
+    
+    class Meta:
+        model = Evento
+        exclude = ('salt','latitud','longitud','empresa')
+        
+def repeated_ongoing_name_ignore_self(value):
+    eventos = Evento.objects.all()
+    cont = 0
+    for evento in eventos:
+        if(evento.nombre == value): #Queda añadir el estado
+            cont += 1  
+    #Si vale 2, significa que se ha encontrado a si mismo y a otro mas 
+    if(cont >=2):
+        raise forms.ValidationError("Ya hay una fiesta en curso con ese nombre!")
+    return value
+
+def repeated_ongoing_place_ignore_self(value):
+    eventos = Evento.objects.all()
+    cont = 0
+    for evento in eventos:
+        if(evento.ubicacion == value):  #Queda añadir el estado
+            cont += 1 
+    #Si vale 2, significa que se ha encontrado a si mismo y a otro mas 
+    if(cont >=2):
+        raise forms.ValidationError("Ya hay una fiesta en curso aquí!")
+    return value
+        
+class FiestaEditForm(ModelForm):
+    #dia = forms.DateField(widget=DatePickerInput, label="Día", validators=[present_or_future_date])
+    #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
+    precioEntrada = forms.IntegerField(widget=NumberInput, label="Precio", validators=[above_zero])
+    totalEntradas = forms.IntegerField(widget=NumberInput, label="Total Entradas", validators=[above_zero])
+    nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name_ignore_self])
+    descripcion = forms.CharField(widget=forms.Textarea, label="Descripción")
+    ubicacion = forms.CharField(label="Ubicación", validators=[repeated_ongoing_place_ignore_self])
+    imagen = forms.ImageField(widget=forms.FileInput(), label="Imágen")
+    
+    class Meta:
+        model = Evento
+        exclude = ('salt','latitud','longitud','empresa')
