@@ -35,15 +35,39 @@ from geopy.geocoders import Nominatim
 User = get_user_model()
 rec = 0
 
-
-# Create your views here.
-def listar_eventos(request): 
-    eventos = Evento.objects.filter(fecha__range=[str(timezone.now() + timezone.timedelta(hours=3)), "7777-07-07"])
+def listar_eventos(request):
+    #Se obtienen todos los eventos. Se itera cada uno de ellos, para comprobar cuales pasan a estar en estado Acabado
+    eventos = Evento.objects.all()
+    for x in eventos:
+        #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
+        if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
+            x.estado = 'A'
+            x.save()     
+    #Luego se hace un GET de aquellos con estado En Curso
+    eventos = Evento.objects.filter(estado = 'E')
     return render(request,'listar_eventos.html', {"eventos":eventos})
+
+def listar_eventos_empleado(request, id): 
+    #Se obtienen todos los eventos. Se itera cada uno de ellos, para comprobar cuales pasan a estar en estado Acabado
+    eventos = Evento.objects.all()
+    for x in eventos:
+        #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
+        if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
+            x.estado = 'A'
+            x.save()     
+    #Luego se hace un GET de aquellos con estado En Curso
+    eventos = Evento.objects.filter(estado = 'E')
+    return render(request,'empleado.html', {"eventos":eventos})
 
 def mapa_eventos(request): 
     eventos = Evento.objects.all()
-    #List of MapParty object.
+    for x in eventos:
+        #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
+        if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
+            x.estado = 'A'
+            x.save()     
+    #Luego se hace un GET de aquellos con estado En Curso
+    eventos = Evento.objects.filter(estado = 'E')
     map_list = []
     for x in eventos:
         map_list.append(x.latitud)
@@ -74,22 +98,6 @@ def scan(request, evento_id):
         return HttpResponse(status=200)
     else:
         return render(request, 'scan.html')
-    
-def listar_eventos_empleado(request, empleado_id): 
-    hayUsuario = User.objects.filter(id=request.user.id).exists()
-    if hayUsuario == True:
-        usuario = User.objects.get(id=request.user.id)
-        empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
-        if empleado_exists:
-            empleado = Empleado.objects.get(user = usuario)
-            eventos = Evento.objects.filter(empresa = empleado.empresa, fecha__range=[str(timezone.now() + timezone.timedelta(hours=3)), "7777-07-07"])
-            return render(request,'empleado.html', {"eventos":eventos})
-        else:
-            response = redirect('/error/')
-            return response
-    else:
-        response = redirect('/error/')
-        return response
 
 class InicioVista(View):
     def get(self, request):
@@ -102,13 +110,10 @@ class InicioVista(View):
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
             empleado_exists = (Empleado.objects.filter(user = usuario).count() > 0)
-
             if empresa_exists:
                 response = redirect('/empresa/{}/'.format(request.user.id))
                 return response
             if cliente_exists:
-                cliente = Cliente.objects.get(user = usuario)
-                proyecto.entrada.check_dates(cliente)
                 response = redirect('/eventos/')
                 return response
             if empleado_exists:
@@ -384,6 +389,8 @@ class VistaEditarEvento(UpdateView):
         evento.empresa = empresa
         evento.latitud = latitud
         evento.longitud = longitud
+        #Al editarse, un evento sigue en curso. Pasará a acabado en una comprobación previa al listado
+        evento.estado = 'E'
         evento.save()
         response = redirect('/empresa/{}/'.format(self.request.user.id))
         return response
@@ -409,8 +416,10 @@ def crear_fiesta(request):
             evento.empresa = empresa
             evento.latitud = latitud
             evento.longitud = longitud
+            #Al crear, un evento está por defecto En Curso
+            evento.estado = 'E'
             evento.save()
-            response = redirect('/empresa/{}/'.format(empresa.id))
+            response = redirect('/empresa/{}/'.format(request.user.id))
             return response
         else:
             return render (request, 'crear_evento.html', {'form': form})
@@ -496,6 +505,8 @@ def recargar_saldo(request, id):
 
             form = PayPalPaymentsForm(initial=paypal_dict)
             return render(request, 'saldo_procesar_pago.html', {'form': form})
+        else:
+            return render(request, 'saldo_opciones.html', {'form':form})
     else:
         form = proyecto.forms.PaypalAmountForm()
         return render(request, 'saldo_opciones.html', {'form':form})

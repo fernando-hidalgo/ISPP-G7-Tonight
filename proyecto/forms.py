@@ -71,7 +71,6 @@ class ClienteModelForm(ModelForm):
         }
     def __init__(self, *args, **kwargs):
         super(ClienteModelForm, self).__init__(*args, **kwargs)
-        self.fields['imagen'].required = True
         self.fields['tlf'].required = True
         for field_name in ('tlf', 'imagen'):
             self.fields[field_name].help_text = ''
@@ -111,9 +110,6 @@ class EmpresaModelForm(ModelForm):
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'
-
-class PaypalAmountForm(forms.Form):
-    cantidad = forms.IntegerField(widget=NumberInput, label="Cantidad")
 
 class DatePickerInput(forms.DateInput):
         input_type = 'date'
@@ -170,7 +166,10 @@ class FiestaForm(ModelForm):
     
     class Meta:
         model = Evento
-        exclude = ('salt','latitud','longitud','empresa')
+        exclude = ('salt','latitud','longitud','empresa','estado')
+        widgets = {
+            'fecha': TextInput(attrs={'placeholder': 'YYYY-MM-DD HH:MM'}),
+        }
         
 def repeated_ongoing_name_ignore_self(value):
     eventos = Evento.objects.all()
@@ -213,3 +212,6 @@ class FiestaEditForm(ModelForm):
         widgets = {
             'fecha': TextInput(attrs={'placeholder': 'YYYY-MM-DD HH:MM'}),
         }
+        
+class PaypalAmountForm(forms.Form):
+    cantidad = forms.IntegerField(widget=NumberInput, label="Cantidad", validators=[above_zero])
