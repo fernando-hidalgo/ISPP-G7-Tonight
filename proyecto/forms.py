@@ -89,10 +89,25 @@ class EmpresaModelForm(ModelForm):
             'imagen': 'Imagen',
             'cif': 'CIF',
         }
+        help_texts = {
+            'tlf': None,
+            'imagen': None,
+            'cif': None,
+        }
     def __init__(self, *args, **kwargs):
         super(EmpresaModelForm, self).__init__(*args, **kwargs)
         self.fields['imagen'].required = True
-        self.fields['imagen'].help_text = ''
+        self.fields['tlf'].required = True
+        self.fields['cif'].required = True
+        for field_name in ('tlf', 'imagen', 'cif'):
+            self.fields[field_name].help_text = ''
+    
+    def clean_cif(self):
+        cif = self.cleaned_data.get('cif')
+        cif_str=str(cif)
+        if cif_str[:8].isdigit():
+            raise forms.ValidationError('No es un cif')
+        return cif
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'

@@ -21,7 +21,7 @@ class Cliente(models.Model):
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
     tlf = PhoneNumberField(unique = True)
-    cif = ESIdentityCardNumberField()
+    cif = ESIdentityCardNumberField(unique = True)
     imagen = models.ImageField(upload_to='media/')
 
 
@@ -37,6 +37,11 @@ class Evento(models.Model):
     imagen = models.ImageField('Imagen', upload_to='media/')
     latitud= models.FloatField('Latitud')
     longitud= models.FloatField('Longitud')
+    STATUS = (
+        ('E', 'En curso'),
+        ('A', 'Acabado')
+    )
+    estado = models.CharField(max_length=1, choices=STATUS)
 
 class Entrada(models.Model):
     fechaCompra = models.DateTimeField()

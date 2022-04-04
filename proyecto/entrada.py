@@ -44,3 +44,9 @@ def exchange_entrada(data, evento):
         print("No se ha encontrado una entrada")
         return False
 
+def check_dates(cliente):
+    entradas = Entrada.objects.filter(cliente = cliente)
+    for entrada in entradas:
+        if datetime.datetime.now() > entrada.fechaCaducidad:
+            entrada.estado = 'C'
+            entrada.save()

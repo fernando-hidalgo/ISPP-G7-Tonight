@@ -3,6 +3,42 @@
   {% block content %}
   <body>
     <section class="container">
+        <div class="row">
+          <div class="col-3">
+            {% if es_duenho %}
+            <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/empresa/{{ user.id }}/'">
+              <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% elif no_duenho %}
+            <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/eventos/'">
+                <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% elif es_empleado %}
+            <button style="position: absolute;top: 10%;right:73%;top:0%" class="btn" onclick="location.href='/empleados/{{ user.id }}/'">
+                <i class="bi bi-arrow-left-circle-fill" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% endif %}
+          </div>
+  
+          <div class="col-6">
+            <img src="/media/media/Logo.png" alt="Logo" class="img-fluid"/>
+          </div>
+        
+          <div class="col-3">
+            {% if es_duenho %}
+            <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/empresa/{{ user.id }}/'">
+              <i class="bi bi-person-circle" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% elif no_duenho %}
+            <button style="position: absolute;top: 10%;left:73%;top:0%" class="btn" onclick="location.href='/cliente/{{ user.id }}/'">
+              <i class="bi bi-person-circle" style="font-size: 4rem; color: #A017E0;"></i>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+    <section class="container">
       <div class="row">
         <img src="/media/{{ evento.imagen }}" alt="Logo" class="img-party"/>
       </div>
@@ -34,7 +70,8 @@
                     Eliminar</button>
                 <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/editar'">
                     Editar</button>
-                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/scan'">
+            {% elif es_empleado %}
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/scan'">
                     Escanear</button>
             {% elif no_duenho %}
                 {% if has_entrada %}
