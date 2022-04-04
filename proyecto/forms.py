@@ -138,7 +138,7 @@ def repeated_ongoing_name(value):
     repeated = False
     eventos = Evento.objects.all()
     for evento in eventos:
-        if(evento.nombre == value): #Queda añadir el estado
+        if(evento.nombre == value and evento.nombre == 'E'): #Queda añadir el estado
             repeated = True
     if(repeated):
         raise forms.ValidationError("Ya hay una fiesta en curso con ese nombre!")
@@ -148,7 +148,7 @@ def repeated_ongoing_place(value):
     repeated = False
     eventos = Evento.objects.all()
     for evento in eventos:
-        if(evento.ubicacion == value):  #Queda añadir el estado
+        if(evento.ubicacion == value and evento.nombre == 'E'):  #Queda añadir el estado
             repeated = True
     if(repeated):
         raise forms.ValidationError("Ya hay una fiesta en curso aquí!")

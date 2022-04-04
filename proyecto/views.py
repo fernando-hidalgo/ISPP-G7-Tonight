@@ -33,73 +33,106 @@ from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from geopy.geocoders import Nominatim
+from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 User = get_user_model()
 rec = 0
 
+@login_required
 def listar_eventos(request):
-    #Se obtienen todos los eventos. Se itera cada uno de ellos, para comprobar cuales pasan a estar en estado Acabado
-    eventos = Evento.objects.all()
-    for x in eventos:
-        #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
-        if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
-            x.estado = 'A'
-            x.save()     
-    #Luego se hace un GET de aquellos con estado En Curso
-    eventos = Evento.objects.filter(estado = 'E')
-    return render(request,'listar_eventos.html', {"eventos":eventos})
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        #Se obtienen todos los eventos. Se itera cada uno de ellos, para comprobar cuales pasan a estar en estado Acabado
+        eventos = Evento.objects.all()
+        for x in eventos:
+            #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
+            if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
+                x.estado = 'A'
+                x.save()     
+        #Luego se hace un GET de aquellos con estado En Curso
+        eventos = Evento.objects.filter(estado = 'E')
+        return render(request,'listar_eventos.html', {"eventos":eventos})
+    else:
+        return redirect('/')
 
-def listar_eventos_empleado(request, id): 
-    #Se obtienen todos los eventos. Se itera cada uno de ellos, para comprobar cuales pasan a estar en estado Acabado
-    eventos = Evento.objects.all()
-    for x in eventos:
-        #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
-        if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
-            x.estado = 'A'
-            x.save()     
-    #Luego se hace un GET de aquellos con estado En Curso
-    eventos = Evento.objects.filter(estado = 'E')
-    return render(request,'empleado.html', {"eventos":eventos})
+@login_required
+def listar_eventos_empleado(request, id):
+    #Solo los Empleados tienen acceso
+    acceso = Empleado.objects.filter(user = request.user.id)
+    if(acceso):
+        #Se obtienen todos los eventos. Se itera cada uno de ellos, para comprobar cuales pasan a estar en estado Acabado
+        eventos = Evento.objects.all()
+        for x in eventos:
+            #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
+            if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
+                x.estado = 'A'
+                x.save()     
+        #Luego se hace un GET de aquellos con estado En Curso
+        eventos = Evento.objects.filter(estado = 'E')
+        return render(request,'empleado.html', {"eventos":eventos})
+    else:
+        return redirect('/')
 
+@login_required
 def mapa_eventos(request): 
-    eventos = Evento.objects.all()
-    for x in eventos:
-        #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
-        if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
-            x.estado = 'A'
-            x.save()     
-    #Luego se hace un GET de aquellos con estado En Curso
-    eventos = Evento.objects.filter(estado = 'E')
-    map_list = []
-    for x in eventos:
-        map_list.append(x.latitud)
-        map_list.append(x.longitud)
-        map_list.append(x.id)
-    return render(request,'mapa_eventos.html', {"fiestas":map_list})
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        eventos = Evento.objects.all()
+        for x in eventos:
+            #Si la fecha actual es mayor que la fecha de incio mas x horas, se considera que el Evento ha acabado
+            if(timezone.now() > x.fecha + timezone.timedelta(hours=3)):
+                x.estado = 'A'
+                x.save()     
+        #Luego se hace un GET de aquellos con estado En Curso
+        eventos = Evento.objects.filter(estado = 'E')
+        map_list = []
+        for x in eventos:
+            map_list.append(x.latitud)
+            map_list.append(x.longitud)
+            map_list.append(x.id)
+        return render(request,'mapa_eventos.html', {"fiestas":map_list})
+    else:
+        return redirect('/')
 
+@login_required
 def QR(request, evento_id):
-    if request.user.id == None:
-        return redirect('/error/')
-    evento = get_object_or_404(Evento, id = evento_id)
-    user = User.objects.get(id = request.user.id)
-    cliente = Cliente.objects.get(user = user)
-    entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
-    if entrada_exists.count() > 0:
-        entrada = entrada_exists.first()
-        context = proyecto.qr.render_qr(evento, entrada)
-        return render(request, "qr.html", context=context)
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+            return redirect('/error/')
+        evento = get_object_or_404(Evento, id = evento_id)
+        user = User.objects.get(id = request.user.id)
+        cliente = Cliente.objects.get(user = user)
+        entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento)
+        if entrada_exists.count() > 0:
+            entrada = entrada_exists.first()
+            context = proyecto.qr.render_qr(evento, entrada)
+            return render(request, "qr.html", context=context)
+        else:
+            return redirect('/error/')
     else:
-        return redirect('/error/')
+        return redirect('/')
 
+@login_required
 def scan(request, evento_id):
-    evento = get_object_or_404(Evento, id = evento_id)
-    if request.method == 'POST':
-        print("funciona")
-        data = request.POST.get('hash')
-        proyecto.entrada.exchange_entrada(data, evento)
-        return HttpResponse(status=200)
+    #Solo los Empleados tienen acceso
+    acceso = Empleado.objects.filter(user = request.user.id)
+    if(acceso):
+        evento = get_object_or_404(Evento, id = evento_id)
+        if request.method == 'POST':
+            print("funciona")
+            data = request.POST.get('hash')
+            proyecto.entrada.exchange_entrada(data, evento)
+            return HttpResponse(status=200)
+        else:
+            return render(request, 'scan.html')
     else:
-        return render(request, 'scan.html')
+        return redirect('/')
 
 class InicioVista(View):
     def get(self, request):
@@ -134,35 +167,40 @@ class ErrorVista(TemplateView):
 class WelcomeVista(TemplateView):
     template_name = 'welcome.html'
 
-class ClientProfile(View):
+class ClientProfile(LoginRequiredMixin, View):
     def get(self, request, id):
-        if request.user.id == None:
-            response = redirect('/error/')
-            return response
-        hayUsuario = User.objects.filter(id=id).exists()
-        if hayUsuario == True:
-            usuario = User.objects.get(id=id)
-            cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
-            if str(request.user.id) != str(id) or not cliente_exists:
+        #Solo los Clientes tienen acceso a su propio perfil
+        acceso = Cliente.objects.filter(user = request.user.id)
+        if(acceso):
+            if request.user.id == None:
                 response = redirect('/error/')
                 return response
-            else:
-                cliente = Cliente.objects.get(user=usuario)
-                hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
-                if hayEntradas == True:
-                    entradas = Entrada.objects.filter(cliente=cliente)
-                    context = {
-                        'cliente': cliente,
-                        'entradas': entradas
-                    }
+            hayUsuario = User.objects.filter(id=id).exists()
+            if hayUsuario == True:
+                usuario = User.objects.get(id=id)
+                cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
+                if str(request.user.id) != str(id) or not cliente_exists:
+                    response = redirect('/error/')
+                    return response
                 else:
-                    context = {
-                        'cliente': cliente
-                    }
-                return render (request, 'cliente.html', context)
+                    cliente = Cliente.objects.get(user=usuario)
+                    hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
+                    if hayEntradas == True:
+                        entradas = Entrada.objects.filter(cliente=cliente)
+                        context = {
+                            'cliente': cliente,
+                            'entradas': entradas
+                        }
+                    else:
+                        context = {
+                            'cliente': cliente
+                        }
+                    return render (request, 'cliente.html', context)
+            else:
+                response = redirect('/error/')
+                return response
         else:
-            response = redirect('/error/')
-            return response
+            return redirect('/')
 
 class ClientCreate(CreateView):
     # specify the model you want to use
@@ -201,12 +239,12 @@ class ClientCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
-class EmpleadoCreate(CreateView):
+class EmpleadoCreate(LoginRequiredMixin, CreateView):
     # specify the model you want to use
     model = Empleado
     template_name="crear_empleado.html"
     # specify the fields
-    form_class = UserForm
+    form_class = UserForm    
 
     def get_context_data(self, **kwargs):
         context = super(EmpleadoCreate, self).get_context_data(**kwargs)
@@ -234,7 +272,7 @@ class EmpleadoCreate(CreateView):
         return redirect('/login/')
 
 class EmpresaCreate(CreateView):
-     # specify the model you want to use
+    # specify the model you want to use
     model = Empresa
     template_name="crear_empresa.html"
     # specify the fields
@@ -279,36 +317,42 @@ class EmpresaCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
-class BusinnessProfile(View):
+class BusinnessProfile(LoginRequiredMixin, View):
     def get(self, request, id):
-        if request.user.id == None:
-            response = redirect('/error/')
-            return response
-        hayUsuario = User.objects.filter(id=id).exists()
-        if hayUsuario == True:
-            usuario = User.objects.get(id=id)
-            empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
-            if str(request.user.id) != str(id) or not empresa_exists:
+        #Solo las Empresas tienen acceso a su propio perfil
+        acceso = Empresa.objects.filter(user = request.user.id)
+        if(acceso):
+            if request.user.id == None:
                 response = redirect('/error/')
                 return response
-            else:
-                empresa = Empresa.objects.get(user=usuario)
-                hayEventos = Evento.objects.filter(empresa=empresa).exists()
-                if hayEventos == True:
-                    eventos = Evento.objects.filter(empresa=empresa)
-                    context = {
-                        'empresa': empresa,
-                        'eventos': eventos
-                    }
+            hayUsuario = User.objects.filter(id=id).exists()
+            if hayUsuario == True:
+                usuario = User.objects.get(id=id)
+                empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
+                if str(request.user.id) != str(id) or not empresa_exists:
+                    response = redirect('/error/')
+                    return response
                 else:
-                    context = {
-                        'empresa': empresa,
-                    }
-                return render (request, 'empresa.html', context)
+                    empresa = Empresa.objects.get(user=usuario)
+                    hayEventos = Evento.objects.filter(empresa=empresa).exists()
+                    if hayEventos == True:
+                        eventos = Evento.objects.filter(empresa=empresa)
+                        context = {
+                            'empresa': empresa,
+                            'eventos': eventos
+                        }
+                    else:
+                        context = {
+                            'empresa': empresa,
+                        }
+                    return render (request, 'empresa.html', context)
+            else:
+                response = redirect('/error/')
+                return response
         else:
-            response = redirect('/error/')
-            return response
+            return redirect('/')
 
+@login_required
 def ver_evento(request, evento_id): 
     no_log = True
     no_duenho = False
@@ -353,25 +397,32 @@ def ver_evento(request, evento_id):
         response = redirect('/error/')
         return response
 
+@login_required
 def borrar_evento(request, evento_id):
-    if request.user.id == None:
+    #Solo las Empresas tienen acceso
+    acceso = Empresa.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_evento = Evento.objects.filter(id=evento_id).exists()
+        if hay_evento == True:
+            Evento.objects.filter(pk=evento_id).delete()
+            eventos = Evento.objects.all()
+            return redirect('/empresa/'+str(request.user.id)+'/')
+        else:
             response = redirect('/error/')
             return response
-    hay_evento = Evento.objects.filter(id=evento_id).exists()
-    if hay_evento == True:
-        Evento.objects.filter(pk=evento_id).delete()
-        eventos = Evento.objects.all()
-        return redirect('/empresa/'+str(request.user.id)+'/')
     else:
-        response = redirect('/error/')
-        return response
+        return redirect('/')
+        
 
-class VistaEditarEvento(UpdateView):
+class VistaEditarEvento(LoginRequiredMixin, UpdateView):
     # specify the model you want to use
     model = Evento
     template_name="editar_evento.html"
     # specify the fields
-    form_class = FiestaEditForm
+    form_class = FiestaEditForm    
     
     def form_valid(self, form):
         #Generar Salt
@@ -382,7 +433,8 @@ class VistaEditarEvento(UpdateView):
         locator = Nominatim(user_agent='proyecto')
         location = locator.geocode(form.cleaned_data["ubicacion"] + ', Sevilla, España')
         if(location == None):
-            location = locator.geocode('Plaza de España, Sevilla, España')
+            messages.add_message(self.request,messages.WARNING,message="Esa dirección no existe")
+            return render (self.request, 'crear_evento.html', {'form': form})
         latitud = location.latitude
         longitud = location.longitude
         #Crear objeto de la Fiesta y guardarlo
@@ -396,128 +448,171 @@ class VistaEditarEvento(UpdateView):
         evento.save()
         response = redirect('/empresa/{}/'.format(self.request.user.id))
         return response
-        
+ 
+@login_required       
 def crear_fiesta(request):
-    if request.method == 'POST':
-        form = proyecto.forms.FiestaForm(request.POST, request.FILES)
-        if form.is_valid():
-            #Generar Salt
-            salt = proyecto.qr.generate_salt()
-            #Obtener Empresa creadora de la Fiesta
-            empresa = Empresa.objects.get(user =request.user)
-            #Crear datos para el mapa
-            locator = Nominatim(user_agent='proyecto')
-            location = locator.geocode(form.cleaned_data["ubicacion"] + ', Sevilla, España')
-            if(location == None):
-                location = locator.geocode('Plaza de España, Sevilla, España')
-            latitud = location.latitude
-            longitud = location.longitude
-            #Crear objeto de la Fiesta y guardarlo
-            evento = form.save(commit=False)
-            evento.salt = salt
-            evento.empresa = empresa
-            evento.latitud = latitud
-            evento.longitud = longitud
-            #Al crear, un evento está por defecto En Curso
-            evento.estado = 'E'
-            evento.save()
-            response = redirect('/empresa/{}/'.format(request.user.id))
-            return response
-        else:
-            return render (request, 'crear_evento.html', {'form': form})
-    else:
-       form = proyecto.forms.FiestaForm()
-       return render(request, 'crear_evento.html', {'form':form})
-
-class Entradas(View):
-    def get(self, request, id):
-        print('El id es'+id)
-        entrada = Entrada.objects.get(id=id)
+    #Solo las Empresas tienen acceso
+    acceso = Empresa.objects.filter(user = request.user.id)
+    if(acceso):
         if request.method == 'POST':
-            id = request.POST.get('id')
-        print(entrada)
-        return render(request,'detalles_evento.html', {"entrada":entrada})
-
-def vender(request, evento_id):
-    if request.method == 'POST':
-        form = proyecto.forms.TransactionForm(request.POST)
-        evento = Evento.objects.get(id=evento_id)
-        if form.is_valid():
-            usuario = User.objects.get(id=request.user.id)
-            dia = form.cleaned_data["dia"]
-            hora = form.cleaned_data["hora"]
-            fechLimite = datetime.datetime.combine(dia,hora)
-            if fechLimite < datetime.datetime.now() or fechLimite > evento.fecha:
-                messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
-                return redirect("/eventos/"+str(evento.id)+"/vender")
-            cliente = Cliente.objects.get(user = usuario)
-            poner_venta(evento, cliente, fechLimite)
-        return redirect(ver_evento, evento_id=evento.id)
-    else:
-        form = proyecto.forms.TransactionForm()
-        return render(request, 'transaccion.html', {'form':form, 'id':evento_id})
-
-def orden_comprar(request, evento_id):
-    if request.method == 'POST':
-        form = proyecto.forms.TransactionForm(request.POST)
-        evento = Evento.objects.get(id=evento_id)
-        if form.is_valid():
-            usuario = User.objects.get(id=request.user.id)
-            dia = form.cleaned_data["dia"]
-            hora = form.cleaned_data["hora"]
-            fechLimite = datetime.datetime.combine(dia,hora)
-            if fechLimite < datetime.datetime.now() or fechLimite > evento.fecha:
-                messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
-                return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
-            cliente = Cliente.objects.get(user = usuario)
-            poner_compra(evento, cliente, fechLimite)
-        return redirect(ver_evento, evento_id=evento.id)
-    else:
-        form = proyecto.forms.TransactionForm()
-        return render(request, 'transaccion.html', {'form':form, 'id':evento_id})
-    
-def cancelar_transaccion(request, evento_id):
-    o_user = User.objects.get(id=request.user.id)
-    evento = Evento.objects.get(id=evento_id)
-    cliente = Cliente.objects.get(user = o_user)
-    transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N').first()
-    proyecto.transacciones.cancelar_transaccion(transaccion)
-    return redirect(ver_evento, evento_id=evento.id)
-
-def compra_directa(request, evento_id):
-    o_user = User.objects.get(id=request.user.id)
-    cliente = Cliente.objects.get(user = o_user)
-    evento = Evento.objects.get(id=evento_id)
-    create_entrada(cliente,evento)
-    return redirect(ver_evento, evento_id=evento.id)
-
-def recargar_saldo(request, id):
-    if request.method == 'POST':
-        form = proyecto.forms.PaypalAmountForm(request.POST)
-        if form.is_valid():
-            cantidad = form.cleaned_data["cantidad"]
-            
-            host = request.get_host()
-            paypal_dict = {
-                'business': settings.PAYPAL_RECEIVER_EMAIL,
-                'amount': cantidad,
-                'item_name': 'Recarga Saldo Tonight',
-                'currency_code': 'EUR',
-                'notify_url': 'http://{}{}'.format(host,reverse('paypal-ipn')),
-                'return_url': 'http://{}{}'.format(host,reverse('payment_done')),
-                'cancel_return': 'http://{}{}'.format(host,reverse('payment_cancelled')),
-            }
-            
-            global rec
-            rec = cantidad
-
-            form = PayPalPaymentsForm(initial=paypal_dict)
-            return render(request, 'saldo_procesar_pago.html', {'form': form})
+            form = proyecto.forms.FiestaForm(request.POST, request.FILES)
+            if form.is_valid():
+                #Generar Salt
+                salt = proyecto.qr.generate_salt()
+                #Obtener Empresa creadora de la Fiesta
+                empresa = Empresa.objects.get(user =request.user)
+                #Crear datos para el mapa
+                locator = Nominatim(user_agent='proyecto')
+                location = locator.geocode(form.cleaned_data["ubicacion"] + ', Sevilla, España')
+                #En caso que GeoPy no encuentre esa dirección, se vuelve al form avisando del error
+                if(location == None):
+                    messages.add_message(request,messages.WARNING,message="Esa dirección no existe")
+                    return render (request, 'crear_evento.html', {'form': form})
+                latitud = location.latitude
+                longitud = location.longitude
+                #Crear objeto de la Fiesta y guardarlo
+                evento = form.save(commit=False)
+                evento.salt = salt
+                evento.empresa = empresa
+                evento.latitud = latitud
+                evento.longitud = longitud
+                #Al crear, un evento está por defecto En Curso
+                evento.estado = 'E'
+                evento.save()
+                response = redirect('/empresa/{}/'.format(request.user.id))
+                return response
+            else:
+                return render (request, 'crear_evento.html', {'form': form})
         else:
+           form = proyecto.forms.FiestaForm()
+           return render(request, 'crear_evento.html', {'form':form})
+    else:
+           return redirect('/')
+
+class Entradas(LoginRequiredMixin, View):
+    def get(self, request, id):
+        #Solo los Clientes tienen acceso
+        acceso = Cliente.objects.filter(user = request.user.id)
+        if(acceso):
+            print('El id es'+id)
+            entrada = Entrada.objects.get(id=id)
+            if request.method == 'POST':
+                id = request.POST.get('id')
+            print(entrada)
+            return render(request,'detalles_evento.html', {"entrada":entrada})
+        else:
+            return redirect('/')
+
+@login_required
+def vender(request, evento_id):
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.method == 'POST':
+            form = proyecto.forms.TransactionForm(request.POST)
+            evento = Evento.objects.get(id=evento_id)
+            if form.is_valid():
+                usuario = User.objects.get(id=request.user.id)
+                dia = form.cleaned_data["dia"]
+                hora = form.cleaned_data["hora"]
+                fechLimite = datetime.datetime.combine(dia,hora)
+                if fechLimite < datetime.datetime.now() or fechLimite > evento.fecha:
+                    messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
+                    return redirect("/eventos/"+str(evento.id)+"/vender")
+                cliente = Cliente.objects.get(user = usuario)
+                poner_venta(evento, cliente, fechLimite)
+            return redirect(ver_evento, evento_id=evento.id)
+        else:
+            form = proyecto.forms.TransactionForm()
+            return render(request, 'transaccion.html', {'form':form, 'id':evento_id})
+    else:
+        return redirect('/')
+
+@login_required
+def orden_comprar(request, evento_id):
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.method == 'POST':
+            form = proyecto.forms.TransactionForm(request.POST)
+            evento = Evento.objects.get(id=evento_id)
+            if form.is_valid():
+                usuario = User.objects.get(id=request.user.id)
+                dia = form.cleaned_data["dia"]
+                hora = form.cleaned_data["hora"]
+                fechLimite = datetime.datetime.combine(dia,hora)
+                if fechLimite < datetime.datetime.now() or fechLimite > evento.fecha:
+                    messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
+                    return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
+                cliente = Cliente.objects.get(user = usuario)
+                poner_compra(evento, cliente, fechLimite)
+            return redirect(ver_evento, evento_id=evento.id)
+        else:
+            form = proyecto.forms.TransactionForm()
+            return render(request, 'transaccion.html', {'form':form, 'id':evento_id})
+    else:
+        return redirect('/')
+
+@login_required    
+def cancelar_transaccion(request, evento_id):
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        o_user = User.objects.get(id=request.user.id)
+        evento = Evento.objects.get(id=evento_id)
+        cliente = Cliente.objects.get(user = o_user)
+        transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N').first()
+        proyecto.transacciones.cancelar_transaccion(transaccion)
+        return redirect(ver_evento, evento_id=evento.id)
+    else:
+        return redirect('/')
+
+@login_required
+def compra_directa(request, evento_id):
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        o_user = User.objects.get(id=request.user.id)
+        cliente = Cliente.objects.get(user = o_user)
+        evento = Evento.objects.get(id=evento_id)
+        create_entrada(cliente,evento)
+        return redirect(ver_evento, evento_id=evento.id)
+    else:
+        return redirect('/')
+
+@login_required
+def recargar_saldo(request, id):
+    #Solo los Clientes tienen acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.method == 'POST':
+            form = proyecto.forms.PaypalAmountForm(request.POST)
+            if form.is_valid():
+                cantidad = form.cleaned_data["cantidad"]
+
+                host = request.get_host()
+                paypal_dict = {
+                    'business': settings.PAYPAL_RECEIVER_EMAIL,
+                    'amount': cantidad,
+                    'item_name': 'Recarga Saldo Tonight',
+                    'currency_code': 'EUR',
+                    'notify_url': 'http://{}{}'.format(host,reverse('paypal-ipn')),
+                    'return_url': 'http://{}{}'.format(host,reverse('payment_done')),
+                    'cancel_return': 'http://{}{}'.format(host,reverse('payment_cancelled')),
+                }
+
+                global rec
+                rec = cantidad
+
+                form = PayPalPaymentsForm(initial=paypal_dict)
+                return render(request, 'saldo_procesar_pago.html', {'form': form})
+            else:
+                return render(request, 'saldo_opciones.html', {'form':form})
+        else:
+            form = proyecto.forms.PaypalAmountForm()
             return render(request, 'saldo_opciones.html', {'form':form})
     else:
-        form = proyecto.forms.PaypalAmountForm()
-        return render(request, 'saldo_opciones.html', {'form':form})
+        return redirect('/')
         
 @csrf_exempt
 def payment_done(request):

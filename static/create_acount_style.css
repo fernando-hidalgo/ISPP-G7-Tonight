@@ -4,7 +4,7 @@ body{
     background-image:#000000;
 }
 
-input[type=text], input[type=date], input[type=number], input[type=email], input[type=password]{
+input[type=text], input[type=date], input[type=number], input[type=email], input[type=password], input[type=time]{
     width: 45%;
     font-size: 5vw;
     border: 1px solid #ccc;
@@ -67,7 +67,7 @@ label{
     width: 25%;
 }
 
-.errorlist, .helptext {
+.errorlist, .helptext, .messages, .warning {
     color: rgb(255, 0, 0);
     border: 1px solid #ccc;
     width: 90%;
