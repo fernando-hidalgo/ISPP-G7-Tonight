@@ -1,21 +1,7 @@
-<!-- Required meta tags -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
-<link rel="shortcut icon" href="{%  static 'icons/favicon.ico' %}">
-
-<title>Tonight</title>
+{% extends "headers/header_login.html" %}
+<html lang="en">
+<body>
 {% block content %}
-    <section class="container">
-        <div class="col-6">
-          <img src="/media/media/Logo.png" alt="Logo" class="img-fluid" style="margin-left: 68%"/>
-        </div>
-    </section>
-
     <section class="container" style="">
         <form method="POST" class="form-signin">
             {% csrf_token %}
@@ -33,3 +19,5 @@
         </form>
     </section>
 {% endblock %}
+</body>
+</html>

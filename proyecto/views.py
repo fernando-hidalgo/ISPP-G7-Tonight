@@ -12,7 +12,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm, ClienteModelForm, EmpresaModelForm
+from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm
 from .models import Evento
 from django.utils import timezone
 import proyecto.qr
@@ -30,14 +30,26 @@ from django.conf import settings
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from geopy.geocoders import Nominatim
 
 User = get_user_model()
 rec = 0
+
 
 # Create your views here.
 def listar_eventos(request): 
     eventos = Evento.objects.all()
     return render(request,'listar_eventos.html', {"eventos":eventos})
+
+def mapa_eventos(request): 
+    eventos = Evento.objects.all()
+    #List of MapParty object.
+    map_list = []
+    for x in eventos:
+        map_list.append(x.latitud)
+        map_list.append(x.longitud)
+        map_list.append(x.id)
+    return render(request,'mapa_eventos.html', {"fiestas":map_list})
 
 def QR(request, evento_id):
     if request.user.id == None:
@@ -62,6 +74,7 @@ def scan(request, evento_id):
         return HttpResponse(status=200)
     else:
         return render(request, 'scan.html')
+    
 def listar_eventos_empleado(request, empleado_id): 
     hayUsuario = User.objects.filter(id=request.user.id).exists()
     if hayUsuario == True:
@@ -138,7 +151,7 @@ class ClientProfile(View):
             return response
 
 class ClientCreate(CreateView):
-     # specify the model you want to use
+    # specify the model you want to use
     model = Cliente
     template_name="crear_cliente.html"
     # specify the fields
@@ -175,7 +188,7 @@ class ClientCreate(CreateView):
         return redirect('/login/')
 
 class EmpleadoCreate(CreateView):
-     # specify the model you want to use
+    # specify the model you want to use
     model = Empleado
     template_name="crear_empleado.html"
     # specify the fields
@@ -197,7 +210,7 @@ class EmpleadoCreate(CreateView):
             empleado.save()
             return redirect('/empresa/' + str(request.user.id) + '/')
         else:
-            return redirect('/error/')
+            return render (request, 'crear_empleado.html', {'form': form})
 
     def form_valid(self, form):
         form.save()
@@ -335,38 +348,59 @@ class VistaEditarEvento(UpdateView):
     model = Evento
     template_name="editar_evento.html"
     # specify the fields
-    fields = [
-        "fecha",
-        "precioEntrada",
-        "totalEntradas",
-        "nombre",
-        "descripcion",
-        "ubicacion",
-        "imagen",
-    ]
-    success_url ="/welcome_bussiness/"
-
-class VistaCrearEvento(CreateView):
-    # specify the model you want to use
-    model = Evento
-    template_name="crear_evento.html"
-    # specify the fields
-    fields = [
-        "fecha",
-        "precioEntrada",
-        "totalEntradas",
-        "nombre",
-        "descripcion",
-        "ubicacion",
-        "imagen",
-    ]
+    form_class = FiestaEditForm
+    
     def form_valid(self, form):
-        form.instance.empresa = Empresa.objects.get(user =self.request.user)
-        form.instance.salt = proyecto.qr.generate_salt()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return "/empresa/" + str(self.request.user.id) + "/"
+        #Generar Salt
+        salt = proyecto.qr.generate_salt()
+        #Obtener Empresa creadora de la Fiesta
+        empresa = Empresa.objects.get(user = self.request.user)
+        #Crear datos para el mapa
+        locator = Nominatim(user_agent='proyecto')
+        location = locator.geocode(form.cleaned_data["ubicacion"] + ', Sevilla, España')
+        if(location == None):
+            location = locator.geocode('Plaza de España, Sevilla, España')
+        latitud = location.latitude
+        longitud = location.longitude
+        #Crear objeto de la Fiesta y guardarlo
+        evento = form.save(commit=False)
+        evento.salt = salt
+        evento.empresa = empresa
+        evento.latitud = latitud
+        evento.longitud = longitud
+        evento.save()
+        response = redirect('/empresa/{}/'.format(self.request.user.id))
+        return response
+        
+def crear_fiesta(request):
+    if request.method == 'POST':
+        form = proyecto.forms.FiestaForm(request.POST, request.FILES)
+        if form.is_valid():
+            #Generar Salt
+            salt = proyecto.qr.generate_salt()
+            #Obtener Empresa creadora de la Fiesta
+            empresa = Empresa.objects.get(user =request.user)
+            #Crear datos para el mapa
+            locator = Nominatim(user_agent='proyecto')
+            location = locator.geocode(form.cleaned_data["ubicacion"] + ', Sevilla, España')
+            if(location == None):
+                location = locator.geocode('Plaza de España, Sevilla, España')
+            latitud = location.latitude
+            longitud = location.longitude
+            #Crear objeto de la Fiesta y guardarlo
+            evento = form.save(commit=False)
+            evento.salt = salt
+            evento.empresa = empresa
+            evento.latitud = latitud
+            evento.longitud = longitud
+            evento.save()
+            response = redirect('/empresa/{}/'.format(empresa.id))
+            return response
+        else:
+            return render (request, 'crear_evento.html', {'form': form})
+    else:
+       form = proyecto.forms.FiestaForm()
+       return render(request, 'crear_evento.html', {'form':form})
 
 class Entradas(View):
     def get(self, request, id):
@@ -423,6 +457,7 @@ def compra_directa(request, evento_id):
     evento = Evento.objects.get(id=evento_id)
     create_entrada(cliente,evento)
     return redirect(ver_evento, evento_id=evento.id)
+
 def recargar_saldo(request, id):
     if request.method == 'POST':
         form = proyecto.forms.PaypalAmountForm(request.POST)

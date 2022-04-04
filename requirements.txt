@@ -11,3 +11,4 @@ django-paypal
 django-phonenumber-field[phonenumbers]
 Babel
 django-localflavor
+geopy
