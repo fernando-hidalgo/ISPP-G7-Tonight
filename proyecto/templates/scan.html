@@ -14,7 +14,6 @@
            margin:0px auto;
         }
     </style>
-    
     <video id="preview"></video>
 
 
@@ -31,7 +30,7 @@
             data: {'hash': content},
             headers: {'X-CSRFToken': '{{ csrf_token }}'},
             success: function (result) {
-                console.log(result.d);
+                alert(result.messages[0])
             },
             error: function (result) {
                 console.log(result);
@@ -74,12 +73,6 @@
   </label>
 </div>
 
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-      <script>alert("{{ message }}")</script>
-    {% endfor %}
-</ul>
-{% endif %}
+
 </body>
 </html>

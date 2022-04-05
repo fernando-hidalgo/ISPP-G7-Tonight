@@ -138,7 +138,7 @@ def repeated_ongoing_name(value):
     repeated = False
     eventos = Evento.objects.all()
     for evento in eventos:
-        if(evento.nombre == value and evento.nombre == 'E'): #Queda añadir el estado
+        if(evento.nombre == value and evento.estado == 'E'):
             repeated = True
     if(repeated):
         raise forms.ValidationError("Ya hay una fiesta en curso con ese nombre!")
@@ -148,7 +148,7 @@ def repeated_ongoing_place(value):
     repeated = False
     eventos = Evento.objects.all()
     for evento in eventos:
-        if(evento.ubicacion == value and evento.nombre == 'E'):  #Queda añadir el estado
+        if(evento.ubicacion == value and evento.estado == 'E'):
             repeated = True
     if(repeated):
         raise forms.ValidationError("Ya hay una fiesta en curso aquí!")
@@ -176,8 +176,9 @@ def repeated_ongoing_name_ignore_self(value):
     cont = 0
     for evento in eventos:
         if(evento.nombre == value): #Queda añadir el estado
+            print(evento.nombre)
             cont += 1  
-    #Si vale 2, significa que se ha encontrado a si mismo y a otro mas 
+    #Si vale 2, significa que se ha encontrado a si mismo y a otro mas
     if(cont >=2):
         raise forms.ValidationError("Ya hay una fiesta en curso con ese nombre!")
     return value
@@ -189,7 +190,7 @@ def repeated_ongoing_place_ignore_self(value):
         if(evento.ubicacion == value):  #Queda añadir el estado
             cont += 1 
     #Si vale 2, significa que se ha encontrado a si mismo y a otro mas 
-    if(cont >=2):
+    if(cont >1):
         raise forms.ValidationError("Ya hay una fiesta en curso aquí!")
     return value
         
@@ -198,9 +199,9 @@ class FiestaEditForm(ModelForm):
     #hora = forms.TimeField(widget=TimePickerInput, label="Hora")
     precioEntrada = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Precio", validators=[above_zero])
     totalEntradas = forms.IntegerField(widget=NumberInput(attrs={'placeholder':'Cantidad >=0'}), label="Total Entradas", validators=[above_zero])
-    nombre = forms.CharField(label="Nombre", validators=[repeated_ongoing_name_ignore_self])
+    nombre = forms.CharField(label="Nombre")
     descripcion = forms.CharField(widget=forms.Textarea, label="Descripción")
-    ubicacion = forms.CharField(label="Ubicación", validators=[repeated_ongoing_place_ignore_self])
+    ubicacion = forms.CharField(label="Ubicación")
     
     class Meta:
         model = Evento

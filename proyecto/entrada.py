@@ -40,25 +40,25 @@ def create_entrada(request, cliente, evento):
 def exchange_entrada(request, data, evento):
     """LLamamos a la la función de leer qr del qr.py y en caso de verificarse
     que dicha entrada es valida y esta activa, se pasa a estado vendida y devuelve un okay"""
+    print(data)
+    print(evento)
     entrada = proyecto.qr.verify_qr(data, evento)
+    print(entrada)
     if entrada is not None:
         if entrada.estado == 'A':
             entrada.estado = 'U'
             entrada.save()
-            messages.info(request, 'La entrada es correcta')
-            return True
+            msg = 'La entrada es correcta'
         elif entrada.estado == 'C':
-            messages.info(request, 'La entrada está caducada')
-            return False
+            msg = 'La entrada está caducada'
         elif entrada.estado == 'U':
-            messages.info(request, 'Esta entrada ya ha sido escaneada')
-            return False
+            msg = 'Esta entrada ya ha sido escaneada'
         else:
-            messages.info(request, 'Esta entrada no puede ser escaneada (¿está en venta?)')
-            return False
+            msg = 'Esta entrada no puede ser escaneada (¿está en venta?)'
+        return msg
     else:
-        messages.info(request, 'No se ha encontrado una entrada')
-        return False
+        msg = 'No se ha encontrado una entrada'
+        return msg
 
 def check_dates(cliente):
     entradas = Entrada.objects.filter(cliente = cliente)

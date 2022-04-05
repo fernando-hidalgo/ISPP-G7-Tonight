@@ -73,7 +73,7 @@ def get_data(img):
 def verify_qr(data, evento):
     if len(data.split(',')) == 2:
         name_event, qr_hash = data.split(',')
-        entradas = Entrada.objects.all().filter(evento=evento.id)
+        entradas = Entrada.objects.all().filter(evento=evento.id, estado='A')
         print("Entradas: ", entradas)
         for entrada in entradas:
             if entrada.hash == qr_hash:

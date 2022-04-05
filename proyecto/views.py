@@ -36,6 +36,7 @@ from geopy.geocoders import Nominatim
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+import json
 
 User = get_user_model()
 rec = 0
@@ -127,8 +128,18 @@ def scan(request, evento_id):
         if request.method == 'POST':
             print("funciona")
             data = request.POST.get('hash')
-            proyecto.entrada.exchange_entrada(data, evento)
-            return HttpResponse(status=200)
+            msg = proyecto.entrada.exchange_entrada(request, data, evento)
+            messages.add_message(request,messages.INFO,message=msg)
+
+            django_messages = []
+            for message in messages.get_messages(request):
+                django_messages.append(message.message)
+
+            data_ajax = {}
+            data_ajax['messages'] = django_messages
+
+            print(msg)
+            return HttpResponse(json.dumps(data_ajax), content_type="application/json")
         else:
             return render(request, 'scan.html')
     else:
@@ -440,11 +451,30 @@ class VistaEditarEvento(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
         location = locator.geocode(form.cleaned_data["ubicacion"] + ', Sevilla, España')
         if(location == None):
             messages.add_message(self.request,messages.WARNING,message="Esa dirección no existe")
-            return render (self.request, 'crear_evento.html', {'form': form})
+            return render (self.request, 'editar_evento.html', {'form': form})
         latitud = location.latitude
         longitud = location.longitude
-        #Crear objeto de la Fiesta y guardarlo
-        evento = form.save(commit=False)
+        evento = form.save(commit=False) 
+        #Evita que la edición del evento establezca una ubicacion de una fiesta en curso
+        ev = Evento.objects.filter(ubicacion = form.cleaned_data["ubicacion"], estado = 'E')
+        res = []
+        for e in ev:
+            if(e.id != evento.id):
+                res.append(e)
+        print(len(res))
+        if(len(res) != 0):
+            messages.add_message(self.request,messages.WARNING,message="Ya hay una fiesta en curso aquí!")
+            return render (self.request, 'editar_evento.html', {'form': form})
+        #Evita que la edición del evento establezca un nombre de una fiesta en curso
+        ev = Evento.objects.filter(nombre = form.cleaned_data["nombre"], estado = 'E')
+        res = []
+        for e in ev:
+            if(e.id != evento.id):
+                res.append(e)
+        print(len(res))
+        if(len(res) != 0):
+            messages.add_message(self.request,messages.WARNING,message="Ya hay una fiesta en curso con ese nombre!")
+            return render (self.request, 'editar_evento.html', {'form': form})
         evento.salt = salt
         evento.empresa = empresa
         evento.latitud = latitud
@@ -526,7 +556,7 @@ def vender(request, evento_id):
                     messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
                     return redirect("/eventos/"+str(evento.id)+"/vender")
                 cliente = Cliente.objects.get(user = usuario)
-                poner_venta(evento, cliente, fechLimite)
+                poner_venta(request,evento,cliente,fechLimite)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -551,7 +581,7 @@ def orden_comprar(request, evento_id):
                     messages.add_message(request,messages.WARNING,message="La fecha debe ser superior a hoy y menor que el evento")
                     return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
                 cliente = Cliente.objects.get(user = usuario)
-                poner_compra(evento, cliente, fechLimite)
+                poner_compra(request,evento, cliente, fechLimite)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -581,7 +611,7 @@ def compra_directa(request, evento_id):
         o_user = User.objects.get(id=request.user.id)
         cliente = Cliente.objects.get(user = o_user)
         evento = Evento.objects.get(id=evento_id)
-        create_entrada(cliente,evento)
+        create_entrada(request,cliente,evento)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
