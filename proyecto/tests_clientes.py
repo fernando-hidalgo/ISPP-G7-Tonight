@@ -13,6 +13,7 @@ from .models import Cliente, Empresa
 # Create your tests here.
 
 class ClienteTestCase(StaticLiveServerTestCase):
+    
     reset_sequences = True
 
     def setUp(self):

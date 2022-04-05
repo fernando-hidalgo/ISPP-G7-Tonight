@@ -41,7 +41,6 @@ class EventosTestCase(TransactionTestCase):
         self.assertEqual(Evento.objects.count(), 1)  
 
     def test_fecha_anterior(self):
-        # print('Hola' + str(Empresa.objects.get(tlf=34)))        
         evento = Evento(fecha=datetime(2020, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
         try:
             evento.save()
@@ -57,7 +56,6 @@ class EventosTestCase(TransactionTestCase):
 
     def test_totalEntradas_negativo(self):
         evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=-5, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
-        # print('Hola' + str(Empresa.objects.get(tlf=34)))
         try:
             evento.save()
         except DataError as e:

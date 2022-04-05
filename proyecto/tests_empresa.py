@@ -18,6 +18,8 @@ import os
 
 class EmpresaTestCase(TransactionTestCase):
 
+    reset_sequences = True
+
     def setUp(self):    
         user_admin = User(username='admin', is_staff=True,  is_superuser=True, first_name='admin', last_name='last_name_admin', email='admin@gmail.com') 
         user_admin.set_password('admin')
@@ -112,7 +114,6 @@ class EmpresaTestCase(TransactionTestCase):
         try:
             empresa.save()
         except DataError as e:
-        #  print('Hola' + str(e))
          self.assertIn('Out of range value for column', str(e))
 
     def test_tlf_muy_grande(self):
