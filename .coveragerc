@@ -1,0 +1,10 @@
+[run]
+omit = 
+    */venv/*
+    */tests/*
+    */migrations/*
+    */__init__.py
+
+[report]
+
+ignore_errors = True
