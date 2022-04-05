@@ -40,6 +40,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 User = get_user_model()
 rec = 0
 
+loginpath='/login/'
+errorpath='/error/'
+
 @login_required
 def listar_eventos(request):
     #Solo los Clientes tienen acceso
@@ -104,7 +107,7 @@ def QR(request, evento_id):
     acceso = Cliente.objects.filter(user = request.user.id)
     if(acceso):
         if request.user.id == None:
-            return redirect('/error/')
+            return redirect(errorpath)
         evento = get_object_or_404(Evento, id = evento_id)
         user = User.objects.get(id = request.user.id)
         cliente = Cliente.objects.get(user = user)
@@ -114,7 +117,7 @@ def QR(request, evento_id):
             context = proyecto.qr.render_qr(evento, entrada)
             return render(request, "qr.html", context=context)
         else:
-            return redirect('/error/')
+            return redirect(errorpath)
     else:
         return redirect('/')
 
@@ -137,10 +140,10 @@ def scan(request, evento_id):
 class InicioVista(View):
     def get(self, request):
         if request.user.id == None:
-            response = redirect('/error/')
+            response = redirect(errorpath)
             return response
-        hayUsuario = User.objects.filter(id=request.user.id).exists()
-        if hayUsuario == True:
+        hay_usuario = User.objects.filter(id=request.user.id).exists()
+        if hay_usuario == True:
             usuario = User.objects.get(id=request.user.id)
             empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
             cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
@@ -158,7 +161,7 @@ class InicioVista(View):
                 response = redirect('/admin/')
                 return response
         else:
-            response = redirect('/error/')
+            response = redirect(errorpath)
             return response
 
 class ErrorVista(TemplateView):
@@ -173,19 +176,19 @@ class ClientProfile(LoginRequiredMixin, View):
         acceso = Cliente.objects.filter(user = request.user.id)
         if(acceso):
             if request.user.id == None:
-                response = redirect('/error/')
+                response = redirect(errorpath)
                 return response
-            hayUsuario = User.objects.filter(id=id).exists()
-            if hayUsuario == True:
+            hay_usuario = User.objects.filter(id=id).exists()
+            if hay_usuario == True:
                 usuario = User.objects.get(id=id)
                 cliente_exists = (Cliente.objects.filter(user = usuario).count() > 0)
                 if str(request.user.id) != str(id) or not cliente_exists:
-                    response = redirect('/error/')
+                    response = redirect(errorpath)
                     return response
                 else:
                     cliente = Cliente.objects.get(user=usuario)
-                    hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
-                    if hayEntradas == True:
+                    hay_entradas = Entrada.objects.filter(cliente=cliente).exists()
+                    if hay_entradas == True:
                         entradas = Entrada.objects.filter(cliente=cliente)
                         context = {
                             'cliente': cliente,
@@ -197,7 +200,7 @@ class ClientProfile(LoginRequiredMixin, View):
                         }
                     return render (request, 'cliente.html', context)
             else:
-                response = redirect('/error/')
+                response = redirect(errorpath)
                 return response
         else:
             return redirect('/')
@@ -227,7 +230,7 @@ class ClientCreate(CreateView):
             cliente.saldo = 0
             cliente.user = form.save()
             cliente.save()
-            return redirect('/login/')
+            return redirect(loginpath)
         else:
             return render (request, 'crear_cliente.html', {'form': form, 'form2': form2})
 
@@ -237,7 +240,7 @@ class ClientCreate(CreateView):
         usuario = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
         usuario = authenticate(username=usuario, password=password)
-        return redirect('/login/')
+        return redirect(loginpath)
 
 class EmpleadoCreate(LoginRequiredMixin, CreateView):
     # specify the model you want to use
@@ -269,7 +272,7 @@ class EmpleadoCreate(LoginRequiredMixin, CreateView):
         usuario = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
         usuario = authenticate(username=usuario, password=password)
-        return redirect('/login/')
+        return redirect(loginpath)
 
 class EmpresaCreate(CreateView):
     # specify the model you want to use
@@ -278,7 +281,7 @@ class EmpresaCreate(CreateView):
     # specify the fields
     form_class = UserForm
     second_form_class = EmpresaModelForm
-    success_url = "/login/"
+    success_url = loginpath
 
     def get_context_data(self, **kwargs):
         context = super(EmpresaCreate, self).get_context_data(**kwargs)
@@ -305,7 +308,7 @@ class EmpresaCreate(CreateView):
             usuario2.save()
             empleado.user = usuario2
             empleado.save()
-            return redirect('/login/')
+            return redirect(loginpath)
         else:
             return render (request, 'crear_empresa.html', {'form': form, 'form2': form2})
 
@@ -323,19 +326,19 @@ class BusinnessProfile(LoginRequiredMixin, View):
         acceso = Empresa.objects.filter(user = request.user.id)
         if(acceso):
             if request.user.id == None:
-                response = redirect('/error/')
+                response = redirect(errorpath)
                 return response
-            hayUsuario = User.objects.filter(id=id).exists()
-            if hayUsuario == True:
+            hay_usuario = User.objects.filter(id=id).exists()
+            if hay_usuario == True:
                 usuario = User.objects.get(id=id)
                 empresa_exists = (Empresa.objects.filter(user = usuario).count() > 0)
                 if str(request.user.id) != str(id) or not empresa_exists:
-                    response = redirect('/error/')
+                    response = redirect(errorpath)
                     return response
                 else:
                     empresa = Empresa.objects.get(user=usuario)
-                    hayEventos = Evento.objects.filter(empresa=empresa).exists()
-                    if hayEventos == True:
+                    hay_eventos = Evento.objects.filter(empresa=empresa).exists()
+                    if hay_eventos == True:
                         eventos = Evento.objects.filter(empresa=empresa)
                         context = {
                             'empresa': empresa,
@@ -347,7 +350,7 @@ class BusinnessProfile(LoginRequiredMixin, View):
                         }
                     return render (request, 'empresa.html', context)
             else:
-                response = redirect('/error/')
+                response = redirect(errorpath)
                 return response
         else:
             return redirect('/')
@@ -363,7 +366,7 @@ def ver_evento(request, evento_id):
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     if hay_evento == True:
         if request.user.id==None:
-            response = redirect('/error/')
+            response = redirect(errorpath)
             return response
         else:
             usuario = User.objects.get(id=request.user.id)
@@ -374,7 +377,7 @@ def ver_evento(request, evento_id):
             if (evento.fecha + timezone.timedelta(hours=3) < timezone.now()) or evento.estado == 'A':
                 evento.estado = 'A'
                 evento.save()
-                return redirect('/error/')
+                return redirect(errorpath)
             if empleado_exists:
                 empleado = Empleado.objects.get(user = usuario)
                 if empleado.empresa ==  evento.empresa:
@@ -394,7 +397,7 @@ def ver_evento(request, evento_id):
                     "es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario, "has_entrada": entrada is not None,
                      "hay_transaccion": transaccion is not None})
     else:
-        response = redirect('/error/')
+        response = redirect(errorpath)
         return response
 
 @login_required
@@ -403,7 +406,7 @@ def borrar_evento(request, evento_id):
     acceso = Empresa.objects.filter(user = request.user.id)
     if(acceso):
         if request.user.id == None:
-                response = redirect('/error/')
+                response = redirect(errorpath)
                 return response
         hay_evento = Evento.objects.filter(id=evento_id).exists()
         if hay_evento == True:
@@ -411,7 +414,7 @@ def borrar_evento(request, evento_id):
             eventos = Evento.objects.all()
             return redirect('/empresa/'+str(request.user.id)+'/')
         else:
-            response = redirect('/error/')
+            response = redirect(errorpath)
             return response
     else:
         return redirect('/')
