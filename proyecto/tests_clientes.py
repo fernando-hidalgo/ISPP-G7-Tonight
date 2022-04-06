@@ -117,9 +117,12 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+41524204242")
         self.driver.find_element(By.ID, "id_saldo").send_keys("1000")
+        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
-
+        
         self.driver.get(f'{self.live_server_url}')
+
         self.driver.find_element(By.NAME, "Acceder").click()
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("admin")
@@ -128,4 +131,4 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         self.driver.get(f'{self.live_server_url}/cliente/')
 
         self.assertEqual(Cliente.objects.count(), 1)
-        #assert 'Nombre: admin' in self.driver.page_source and 'Correo: admin@email.com' in self.driver.page_source and 'Teléfono: 524204242' in self.driver.page_source
+#         #assert 'Nombre: admin' in self.driver.page_source and 'Correo: admin@email.com' in self.driver.page_source and 'Teléfono: 524204242' in self.driver.page_source
