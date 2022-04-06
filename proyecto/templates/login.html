@@ -1,0 +1,23 @@
+{% extends "headers/header_login.html" %}
+<html lang="en">
+<body>
+{% block content %}
+    <section class="container" style="">
+        <form method="POST" class="form-signin">
+            {% csrf_token %}
+            <label for="id_username" class="sr-only" style="margin-left: 25%">Usuario</label>
+            <input id="id_username" class="form-control" placeholder="Usuario" name="username" style="width: 50%; margin-left: 25%" required autofocus>
+            <br>
+            <label for="id_password" class="sr-only" style="margin-left: 25%">Contraseña</label>
+            <input type="password" id="id_password" class="form-control" placeholder="Contraseña" style="width: 50%; margin-left: 25%" name="password" required>
+            <div class="checkbox mb-3"></div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" style="margin-left: 37%; font-size: 5.5vw;">Login</button>
+
+            {% if form.errors %}
+                <p>Su usuario y/o contraseña son incorrectos.</p>
+            {% endif %}
+        </form>
+    </section>
+{% endblock %}
+</body>
+</html>

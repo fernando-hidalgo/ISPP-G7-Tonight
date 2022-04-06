@@ -1,0 +1,70 @@
+{% extends "headers/header_profile.html" %}
+<html lang="en">
+  <body>
+    {% block content %}
+    <section class="container">
+      <div class="row">
+        <img src="/media/{{ cliente.imagen }}" alt="Profile Pic" class="img-party">
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="row" style= "margin-top: 3%;">
+        <div class="column" style= "width: 58%;">
+            <div class="container party-infobox text-white">
+              <p>Nombre: {{ cliente.user.username }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Correo: {{ cliente.user.email }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Teléfono: {{ cliente.tlf }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Saldo: {{ cliente.saldo }}€</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="row" style= "margin-top: 3%;">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/cliente/{{user.id}}/saldo'">Recargar Saldo</button> 
+        </div>
+      </div>
+    </section>
+
+    <section class="container profile-tickets-list-card">
+        {% for x in entradas %}
+            <div class="row">
+                <div class="column" style= "width: 20%;">
+                    <p > {{ x.evento.nombre }} </p>
+                </div>
+
+                <div class="column" style= "width: 35%;">
+                    {% if x.estado == 'A' %}
+                    <p> Adquirida </p>
+                    {% elif x.estado == 'E' %}
+                    <p> En venta </p>
+                    {% elif x.estado == 'V' %}
+                    <p> Vendida </p>
+                    {% elif x.estado == 'U' %}
+                    <p> Usada </p>
+                    {% elif x.estado == 'C' %}
+                    <p> Caducada </p>
+                    {%endif%}
+                </div>
+
+                <div class="column" style= "width: 45%;">
+                    <a href="/eventos/{{x.evento.id}}"><input type="button" class="see-ticket-button text-white" value="Ver"></a>
+                </div>
+
+                <hr class="divider" style="height: 3px;">
+            </div>
+        {%endfor%}
+    </section>
+    {% endblock %}
+  </body>
+</html>

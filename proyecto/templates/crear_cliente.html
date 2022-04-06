@@ -1,0 +1,15 @@
+{% extends "headers/header_CRUD.html" %}
+<html lang="en">
+<body>
+  {% block content %}
+    <section class="container">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {{ form2.as_p }}
+            <input type="submit" value="Save"> 
+        </form>  
+    </section>
+  {% endblock %}
+</body>
+</html>

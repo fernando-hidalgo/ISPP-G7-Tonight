@@ -1,0 +1,65 @@
+{% extends "headers/header_profile.html" %}
+<html lang="en">
+  <body>
+    {% block content %}
+    <section class="container">
+      <div class="row">
+        <img src="/media/{{ empresa.imagen }}" alt="imagen perfil" class="img-party"/>
+      </div>
+    </section>
+
+    <section class="container">
+
+      <div class="row" style= "margin-top: 3%;">
+        <div class="column" style= "width: 58%;">
+            <div class="container party-infobox text-white">
+              <p>Nombre: {{ empresa.user.username }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Correo: {{ empresa.user.email }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>Teléfono: {{ empresa.tlf.national_number }}</p>
+            </div>
+        </div>
+      </div>
+      
+      <div class="row" style= "margin-top: 3%;">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/empleados/crear'">Crear empleado</button> 
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/crear'">Crear evento</button> 
+        </div>
+      </div>
+    </section>
+
+    <section class="container profile-tickets-list-card">
+        {% for x in eventos %}
+      <div class="row" style= "margin-top: 3%;">
+        <div class="column" style= "width: 20%;">
+          <p class="profile-text">{{x.nombre}}</p>
+        </div>
+
+        <div class="column" style= "width: 35%;">
+          <p class="profile-text">{{x.fecha|date:"d/m/Y" }}</p>
+        </div>
+
+        <div class="column" style= "width: 30%;  margin-left: 10%">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/{{ x.id }}'">Ver</button> 
+        </div>
+
+        <hr class="divider" style="height: 3px;">
+      </div>
+      {%endfor%}
+    </section>
+    {% endblock %}
+  </body>
+</html>
+
+            

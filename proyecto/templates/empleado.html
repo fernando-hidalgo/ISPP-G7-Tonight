@@ -1,0 +1,34 @@
+{% extends "headers/header_empleado.html" %}
+<html lang="en">
+  <body>
+  {% block content %}
+    {% for x in eventos %}
+        <section class="container party-list-card text-white" style="margin-top: 5%;" onclick="location.href='/eventos/{{ x.id }}'"> 
+          <div class="row" >
+            <div class="container party-list-card-title text-white">
+              <p>{{x.nombre}}</p>
+            </div>
+          </div>
+
+          <div class="row" >
+            <img src="/media/{{x.imagen}}" alt="fiesta" class="party-list-img"/>
+          </div>
+
+          <div class="row" >
+            <div class="column" style= "width: 60%;">
+              <div class="container party-infobox text-white">
+                <p>{{x.fecha|date:"d/m/Y" }}</p>
+              </div>
+            </div>
+        
+            <div class="column" style= "width: 40%;">
+              <div class="container party-infobox text-white">
+                <p>{{ x.precioEntrada }}€</p>
+              </div>
+            </div>
+          </div>
+        </section>
+    {%endfor%}
+  {% endblock %}
+  </body>
+</html>

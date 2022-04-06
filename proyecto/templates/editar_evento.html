@@ -1,0 +1,21 @@
+{% extends "headers/header_CRUD.html" %}
+<html lang="en">
+<body>
+  {% block content %}
+  {% if messages %}
+      <ul class="messages">
+    {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+      </ul>
+    {% endif %}
+    <div class="editar_evento" style="position:relative">
+          <form method="post" enctype="multipart/form-data"> 
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Editar"> 
+        </form> 
+    </div>
+  {% endblock %}
+</body>
+</html>

@@ -1,0 +1,14 @@
+{% extends "headers/header_CRUD.html" %}
+<html lang="en"> 
+<body>
+  {% block content %}
+    <section class="container">
+        <form action="" method="post"> 
+            {% csrf_token %} 
+            {{ form.as_p }} 
+            <input type="submit" value="Aceptar"> 
+        </form> 
+    </section>
+  {% endblock %}
+</body> 
+</html> 

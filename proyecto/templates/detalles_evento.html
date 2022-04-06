@@ -1,0 +1,84 @@
+{% extends "headers/header_detalles.html" %}
+<html lang="en">
+  {% block content %}
+  <body>
+    <section class="container">
+      <div class="row">
+        <img src="/media/{{ evento.imagen }}" alt="Logo" class="img-party"/>
+      </div>
+    </section>
+
+    <section class="container">
+      {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+            <script>alert("{{ message }}")</script>
+          {% endfor %}
+      </ul>
+      {% endif %}
+      <div class="row">
+        <h1 class="party-title">{{evento.nombre}}</h1>
+      </div>
+
+      <div class="row" style= "margin-top: 3%;">
+        <div class="column" style= "width: 58%;">
+            <div class="container party-infobox text-white">
+              <p>{{evento.fecha|date:"d/m/Y H:i" }}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>{{evento.ubicacion}}</p>
+            </div>
+
+            <div class="container party-infobox text-white">
+              <p>{{evento.precioEntrada}}€</p>
+            </div>
+        </div>
+
+        <div class="column" style= "width: 35%; margin-left: 7%">
+            {% if es_duenho %}
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/borrar'">
+                    Eliminar</button>
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/editar'">
+                    Editar</button>
+            {% elif es_empleado %}
+                <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/scan'">
+                    Escanear</button>
+            {% elif no_duenho %}
+                {% if has_entrada %}
+                  {% if hay_transaccion %}
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/cancelar'">
+                    Cancelar</button>
+                  {% else %}
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/vender'">
+                    Vender</button>
+                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/qr'">
+                    Ver entrada</button>
+                  {% endif %}
+                {% else %}
+                    {% if evento.totalEntradas == 0 %}
+                      {% if hay_transaccion %}
+                        <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/cancelar'">
+                          Cancelar</button>
+                      {% else %}
+                        <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/orden_comprar'">
+                          Ordenar compra</button>
+                      {% endif %}
+                    {% else %}
+                      <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/comprar'">
+                      Comprar</button>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="party-description" rows="4" cols="50">
+        <p>{{evento.descripcion}}</p>
+      </div>
+    </section>
+  {% endblock %}
+  </body>
+</html>

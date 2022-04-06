@@ -1,0 +1,26 @@
+{% extends "headers/header_logo.html" %}
+<html lang="en">
+<style>
+.error-description{
+    width: 100%;
+    font-size: 6vw !important;
+    margin-top: 1%;
+    padding: 5%;
+    text-align:center;
+}
+</style>
+
+<body>
+  {% block content %}
+    <section class="container">
+        <div class="error-description" rows="4" cols="50">
+          <p>Aquí no vas a encontrar ninguna fiesta.<br> Sigue este globo y vuelve a Tonight.</p>
+        </div>
+    </section>
+
+    <button style="position: absolute;" class="btn" onclick="location.href='/'" >
+        <i class="bi bi-balloon-heart-fill" style="font-size: 40vw; color: #A017E0; margin-left:68%;"></i>
+    </button>
+  {% endblock %}
+</body>
+</html>
