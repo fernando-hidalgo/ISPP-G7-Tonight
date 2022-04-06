@@ -1,23 +1,16 @@
+{% extends "headers/header_CRUD.html" %}
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Cliente</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Static Example</title>
-    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-
-</head>
-<body>      
-<div class="crear_evento" style="position:relative">
-    <h1>Crear Empresa:</h1>
-    <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {{ form2.as_p }}
-    <input type="submit" value="Save"> 
-    </form>  
-    </div>
+<body>
+    {% block content %}  
+        <div class="crear_evento" style="position:relative">
+            <h1>Crear Empresa:</h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                {{ form2.as_p }}
+                <input type="submit" value="Save"> 
+            </form>  
+        </div>
+    {% endblock %}
 </body>
 </html>
