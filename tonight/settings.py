@@ -13,16 +13,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import dj_database_url
 from pathlib import Path
 import os
-import datetime
-from django.conf import settings
-from django.utils.timezone import make_aware
-
-naive_datetime = datetime.datetime.now()
-naive_datetime.tzinfo  # None
-
-settings.TIME_ZONE  # 'UTC'
-aware_datetime = make_aware(naive_datetime)
-aware_datetime.tzinfo  # <UTC>
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +27,7 @@ SECRET_KEY = 'django-insecure-u9k(q*+hx%zr=$+ouq2054f7f!)7%mc)j^vla(atvu1b8^f^g5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'to-night-desarrollo.herokuapp.com']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'to-night-sp2.herokuapp.com']
 
 
 # Application definition
