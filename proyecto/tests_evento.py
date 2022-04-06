@@ -1,6 +1,7 @@
 from ast import Try
 from datetime import datetime
 from itertools import count
+from telnetlib import STATUS
 from unicodedata import name
 from xmlrpc.client import DateTime, _datetime
 from django.test import TestCase, TransactionTestCase
@@ -36,26 +37,30 @@ class EventosTestCase(TransactionTestCase):
         super().tearDown()
 
     def test_evento_positivo(self):
-        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
+        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
+        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         evento.save()
         self.assertEqual(Evento.objects.count(), 1)  
 
     def test_fecha_anterior(self):
-        evento = Evento(fecha=datetime(2020, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
+        evento = Evento(fecha=datetime(2020, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1',
+        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         try:
             evento.save()
         except DataError as e:
             self.assertIn('Ensure this value is greater than or equal',str(e))
 
     def test_precio_negativo(self):
-        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=-10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
+        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=-10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
+        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         try:
             evento.save()
         except DataError as e:
             self.assertIn('Out of range value for column',str(e))
 
     def test_totalEntradas_negativo(self):
-        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=-5, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
+        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=-5, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
+        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         try:
             evento.save()
         except DataError as e:
@@ -72,7 +77,8 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         user_admin.save()
         empresa = Empresa(user=User.objects.get(username='admin'), tlf='+34671678336', cif='09853118X')
         empresa.save()
-        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', empresa=Empresa.objects.get(id=1))
+        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
+        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         evento.save()
 
         options = webdriver.ChromeOptions()
@@ -97,6 +103,8 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+34676678336")
         self.driver.find_element(By.ID, "id_cif").send_keys("Q2826000H")
+        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
 
         self.driver.get(f'{self.live_server_url}')
@@ -118,6 +126,10 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_nombre").send_keys("occo")
         self.driver.find_element(By.ID, "id_descripcion").send_keys("Fiesta en occo")
         self.driver.find_element(By.ID, "id_ubicacion").send_keys("Sevilla")
+        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
+        self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        time.sleep(5)
         self.driver.find_element_by_name("save").click()
 
         self.assertEqual(Evento.objects.count(), 2)

@@ -14,7 +14,7 @@ from selenium.webdriver.support.ui import Select
 import time
 import os
 
-# Create your tests here.
+# # Create your tests here.
 
 class EmpresaTestCase(TransactionTestCase):
 
@@ -164,6 +164,8 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+41524204242")
         self.driver.find_element(By.ID, "id_cif").send_keys("09853118X")
+        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
 
         self.driver.get(f'{self.live_server_url}')
