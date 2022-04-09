@@ -3,7 +3,7 @@ from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
-from proyecto.views import ClientProfile, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
+from proyecto.views import ClientProfile, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate, TerminosVista
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -45,6 +45,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(template_name='welcome.html')),
     path('crear_empresa/', EmpresaCreate.as_view()),
     path('crear_cliente/', ClientCreate.as_view()),
+    path('terminos/', TerminosVista.as_view()),
+
 ]
 
 if settings.DEBUG:
