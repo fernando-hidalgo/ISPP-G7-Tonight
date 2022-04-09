@@ -74,3 +74,8 @@ class Transaccion(models.Model):
 class Empleado(models.Model):
     user = models.OneToOneField(User, related_name='user_epld', on_delete=models.CASCADE)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+
+class Notificacion(models.Model):
+    mensaje = models.TextField('mensaje', max_length=500)
+    read = models.BooleanField(default=False)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='usuario_notificacion')
