@@ -3,7 +3,7 @@ from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
-from proyecto.views import ClientProfile, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
+from proyecto.views import ClientProfile, InicioVista, NotificacionesView, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -21,6 +21,7 @@ urlpatterns = [
     path('eventos/<int:evento_id>/orden_comprar', views.orden_comprar),
     path('eventos/<int:evento_id>/cancelar', views.cancelar_transaccion),
     path('eventos/<int:evento_id>/qr', views.QR),
+    path('notificaciones/<int:notificacion_id>/borrar', views.borra_notificacion),
     
     #Accesible SOLO para Empresas
     path('empresa/<id>/', BusinnessProfile.as_view()),
@@ -35,6 +36,7 @@ urlpatterns = [
     
     #Accesible por Cliente, Empleado y Empresa
     path('eventos/<int:evento_id>', views.ver_evento),
+    path('notificaciones', NotificacionesView.as_view()),
     
     #Accesible sin Login
     path('', WelcomeVista.as_view()),

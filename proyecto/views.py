@@ -15,7 +15,7 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
 from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm
-from .models import Evento
+from .models import Evento, Notificacion
 from django.utils import timezone
 import proyecto.qr
 import proyecto.entrada
@@ -28,6 +28,7 @@ import datetime
 from proyecto.forms import TransactionForm
 from proyecto.transacciones import poner_venta,poner_compra
 from proyecto.entrada import create_entrada
+import proyecto.notificaciones
 from django.conf import settings
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.csrf import csrf_exempt
@@ -196,15 +197,18 @@ class ClientProfile(LoginRequiredMixin, View):
                 else:
                     cliente = Cliente.objects.get(user=usuario)
                     hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
+                    notificaciones = proyecto.notificaciones.count_unread_notificaciones(request.user.id)
                     if hayEntradas == True:
                         entradas = Entrada.objects.filter(cliente=cliente)
                         context = {
                             'cliente': cliente,
-                            'entradas': entradas
+                            'entradas': entradas,
+                            'notificaciones': notificaciones
                         }
                     else:
                         context = {
-                            'cliente': cliente
+                            'cliente': cliente,
+                            'notificaciones': notificaciones
                         }
                     return render (request, 'cliente.html', context)
             else:
@@ -663,3 +667,15 @@ def payment_done(request):
 @csrf_exempt
 def payment_canceled(request):
     return render(request, 'saldo_cancelado.html')
+
+class NotificacionesView(LoginRequiredMixin, View):
+    def get(self, request):
+        proyecto.notificaciones.set_read_notificaciones(request.user.id)
+        notificaciones = proyecto.notificaciones.get_notificaciones(request.user.id)
+        return render(request,'notificaciones.html', {"notificaciones":notificaciones})
+
+@login_required    
+def borra_notificacion(request, notificacion_id):
+    o_user = User.objects.get(id=request.user.id)
+    proyecto.notificaciones.delete_notificacion(notificacion_id)
+    return NotificacionesView.as_view()(request)
