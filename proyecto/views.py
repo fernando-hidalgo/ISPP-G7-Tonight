@@ -400,12 +400,16 @@ def ver_evento(request, evento_id):
             if cliente_exists:
                 cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
-                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento, estado = 'A')
+                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento).exclude(estado='V')
                 transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N')
+                
                 if entrada_exists.count() > 0:
                     entrada = entrada_exists.first()
                 if transaccion_exists.count() > 0:
                     transaccion = transaccion_exists.first()
+                    print(transaccion)
+                    print(transaccion is not None)
+                    print(entrada is not None)
             elif empresa_exists:
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
@@ -427,6 +431,7 @@ def borrar_evento(request, evento_id):
         if hay_evento == True:
             Evento.objects.filter(pk=evento_id).delete()
             eventos = Evento.objects.all()
+            proyecto.notificaciones.send_notificacion(request.user.id, "Se ha borrado el evento de manera satisfactoria")
             return redirect('/empresa/'+str(request.user.id)+'/')
         else:
             response = redirect('/error/')
@@ -561,6 +566,7 @@ def vender(request, evento_id):
                     return redirect("/eventos/"+str(evento.id)+"/vender")
                 cliente = Cliente.objects.get(user = usuario)
                 poner_venta(request,evento,cliente,fechLimite)
+                proyecto.notificaciones.send_notificacion(usuario.id, "Se ha puesta a la venta una entrada para " + evento.nombre)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -586,6 +592,7 @@ def orden_comprar(request, evento_id):
                     return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
                 cliente = Cliente.objects.get(user = usuario)
                 poner_compra(request,evento, cliente, fechLimite)
+                proyecto.notificaciones.send_notificacion(usuario.id, "Se ha creado una orden de compra para " + evento.nombre)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -603,6 +610,7 @@ def cancelar_transaccion(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N').first()
         proyecto.transacciones.cancelar_transaccion(transaccion)
+        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha concelado la venta de la entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
@@ -616,6 +624,7 @@ def compra_directa(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         evento = Evento.objects.get(id=evento_id)
         create_entrada(request,cliente,evento)
+        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha comprado una entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
@@ -662,6 +671,7 @@ def payment_done(request):
     
     cliente.saldo += rec
     cliente.save()
+    proyecto.notificaciones.send_notificacion(o_user.id, "Se ha recargado el saldo de manera satisfactoria")
     return render(request, 'saldo_exito.html', {'cantidad': rec, 'total': cliente.saldo})
 
 @csrf_exempt
