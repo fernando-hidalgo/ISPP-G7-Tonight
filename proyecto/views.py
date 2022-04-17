@@ -1,3 +1,4 @@
+from re import template
 from urllib import request
 from django import forms
 from django.contrib import messages
@@ -177,6 +178,9 @@ class ErrorVista(TemplateView):
 
 class WelcomeVista(TemplateView):
     template_name = 'welcome.html'
+
+class TerminosVista(TemplateView):
+    template_name = 'terminos.html'
 
 class ClientProfile(LoginRequiredMixin, View):
     def get(self, request, id):
