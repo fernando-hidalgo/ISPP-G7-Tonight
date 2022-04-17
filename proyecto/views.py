@@ -16,7 +16,7 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
 from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm
-from .models import Evento
+from .models import Evento, Notificacion
 from django.utils import timezone
 import proyecto.qr
 import proyecto.entrada
@@ -29,6 +29,7 @@ import datetime
 from proyecto.forms import TransactionForm
 from proyecto.transacciones import poner_venta,poner_compra
 from proyecto.entrada import create_entrada
+import proyecto.notificaciones
 from django.conf import settings
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.csrf import csrf_exempt
@@ -200,15 +201,18 @@ class ClientProfile(LoginRequiredMixin, View):
                 else:
                     cliente = Cliente.objects.get(user=usuario)
                     hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
+                    notificaciones = proyecto.notificaciones.count_unread_notificaciones(request.user.id)
                     if hayEntradas == True:
                         entradas = Entrada.objects.filter(cliente=cliente)
                         context = {
                             'cliente': cliente,
-                            'entradas': entradas
+                            'entradas': entradas,
+                            'notificaciones': notificaciones
                         }
                     else:
                         context = {
-                            'cliente': cliente
+                            'cliente': cliente,
+                            'notificaciones': notificaciones
                         }
                     return render (request, 'cliente.html', context)
             else:
@@ -400,12 +404,16 @@ def ver_evento(request, evento_id):
             if cliente_exists:
                 cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
-                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento, estado = 'A')
+                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento).exclude(estado='V')
                 transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N')
+                
                 if entrada_exists.count() > 0:
                     entrada = entrada_exists.first()
                 if transaccion_exists.count() > 0:
                     transaccion = transaccion_exists.first()
+                    print(transaccion)
+                    print(transaccion is not None)
+                    print(entrada is not None)
             elif empresa_exists:
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
@@ -427,6 +435,7 @@ def borrar_evento(request, evento_id):
         if hay_evento == True:
             Evento.objects.filter(pk=evento_id).delete()
             eventos = Evento.objects.all()
+            proyecto.notificaciones.send_notificacion(request.user.id, "Se ha borrado el evento de manera satisfactoria")
             return redirect('/empresa/'+str(request.user.id)+'/')
         else:
             response = redirect('/error/')
@@ -561,6 +570,7 @@ def vender(request, evento_id):
                     return redirect("/eventos/"+str(evento.id)+"/vender")
                 cliente = Cliente.objects.get(user = usuario)
                 poner_venta(request,evento,cliente,fechLimite)
+                proyecto.notificaciones.send_notificacion(usuario.id, "Se ha puesta a la venta una entrada para " + evento.nombre)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -586,6 +596,7 @@ def orden_comprar(request, evento_id):
                     return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
                 cliente = Cliente.objects.get(user = usuario)
                 poner_compra(request,evento, cliente, fechLimite)
+                proyecto.notificaciones.send_notificacion(usuario.id, "Se ha creado una orden de compra para " + evento.nombre)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -603,6 +614,7 @@ def cancelar_transaccion(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N').first()
         proyecto.transacciones.cancelar_transaccion(transaccion)
+        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha concelado la venta de la entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
@@ -616,6 +628,7 @@ def compra_directa(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         evento = Evento.objects.get(id=evento_id)
         create_entrada(request,cliente,evento)
+        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha comprado una entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
@@ -662,8 +675,21 @@ def payment_done(request):
     
     cliente.saldo += rec
     cliente.save()
+    proyecto.notificaciones.send_notificacion(o_user.id, "Se ha recargado el saldo de manera satisfactoria")
     return render(request, 'saldo_exito.html', {'cantidad': rec, 'total': cliente.saldo})
 
 @csrf_exempt
 def payment_canceled(request):
     return render(request, 'saldo_cancelado.html')
+
+class NotificacionesView(LoginRequiredMixin, View):
+    def get(self, request):
+        proyecto.notificaciones.set_read_notificaciones(request.user.id)
+        notificaciones = proyecto.notificaciones.get_notificaciones(request.user.id)
+        return render(request,'notificaciones.html', {"notificaciones":notificaciones})
+
+@login_required    
+def borra_notificacion(request, notificacion_id):
+    o_user = User.objects.get(id=request.user.id)
+    proyecto.notificaciones.delete_notificacion(notificacion_id)
+    return NotificacionesView.as_view()(request)
