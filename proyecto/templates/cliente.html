@@ -40,6 +40,12 @@
           <button type="button" class="see-ticket-button text-white" onclick="location.href='/notificaciones'">Ver notificaciones ({{ notificaciones }} sin leer)</button> 
         </div>
       </div>
+
+      <div class="row" style= "margin-top: 3%;">
+        <div class="container">
+          <button type="button" class="see-ticket-button text-white" onclick="location.href='/cliente/{{user.id}}/eliminar'">Borrar cuenta</button> 
+        </div>
+      </div>
     </section>
 
     <section class="container profile-tickets-list-card">

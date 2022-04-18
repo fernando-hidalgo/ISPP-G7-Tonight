@@ -258,6 +258,24 @@ class ClientCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
+@login_required
+def borrar_cliente(request, id):
+    #Solo ese usuario tiene acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_cliente = Cliente.objects.filter(user_id=id).exists()
+        if hay_cliente == True and str(request.user.id) == str(id):
+            Cliente.objects.filter(user_id=id).delete()
+            return redirect('/')
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
+
 class EmpleadoCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     # specify the model you want to use
     model = Empleado
@@ -373,6 +391,24 @@ class BusinnessProfile(LoginRequiredMixin, View):
                 return response
         else:
             return redirect('/')
+
+@login_required
+def borrar_empresa(request, id):
+    #Solo ese usuario tiene acceso
+    acceso = Empresa.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_empresa = Empresa.objects.filter(user_id=id).exists()
+        if hay_empresa == True and str(request.user.id) == str(id):
+            Empresa.objects.filter(user_id=id).delete()
+            return redirect('/')
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
 
 @login_required
 def ver_evento(request, evento_id): 
