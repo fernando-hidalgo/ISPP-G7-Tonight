@@ -258,6 +258,25 @@ class ClientCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
+
+class ClientEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    template_name="editar_cliente.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = ClienteModelForm
+
+    def form_valid(self, form, form2):
+        usua=form.save()
+        cliente=form2.save()
+        usuario = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password')
+        usuario = authenticate(username=usuario, password=password)
+        cliente.save()
+        response = redirect('/cliente/{}/'.format(self.request.user.id))
+        return response
+
 @login_required
 def borrar_cliente(request, id):
     #Solo ese usuario tiene acceso

@@ -3,7 +3,7 @@ from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
-from proyecto.views import ClientProfile, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate, TerminosVista, NotificacionesView
+from proyecto.views import ClientProfile, InicioVista, ClientEdit,VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate, TerminosVista, NotificacionesView
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -13,6 +13,7 @@ urlpatterns = [
     path('eventosmapa/', views.mapa_eventos),
     path('eventos/', views.listar_eventos, name='payment_done'),
     path('cliente/<id>/', ClientProfile.as_view()),
+    path('cliente/<pk>/editar', ClientEdit.as_view()),
     path('cliente/<id>/eliminar', views.borrar_cliente),
     path('empresa/<id>/eliminar', views.borrar_empresa),
     path('cliente/<id>/saldo', views.recargar_saldo),
