@@ -38,6 +38,8 @@ from geopy.geocoders import Nominatim
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 import json
 
 User = get_user_model()
@@ -259,23 +261,70 @@ class ClientCreate(CreateView):
         return redirect('/login/')
 
 
-class ClientEdit(UpdateView):
-    # specify the model you want to use
-    model = User
-    template_name="editar_cliente.html"
-    # specify the fields
-    form_class = UserForm
-    second_form_class = ClienteModelForm
+# class ClientEdit(UpdateView):
+#     # specify the model you want to use
+#     model = User
+#     template_name="editar_cliente.html"
+#     # specify the fields
+#     form_class = UserForm
+#     second_form_class = ClienteModelForm
 
-    def form_valid(self, form, form2):
-        usua=form.save()
-        cliente=form2.save()
-        usuario = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
-        usuario = authenticate(username=usuario, password=password)
-        cliente.save()
-        response = redirect('/cliente/{}/'.format(self.request.user.id))
-        return response
+#     def change_client(self):
+#         if request.method == 'POST':
+#             third_form_class = PasswordChangeForm(self.user, self.POST)
+#             if third_form_class.is_valid():
+#                 passw = third_form_class.save()
+#                 update_session_auth_hash(request, passw)
+
+#     def form_valid(self, form, form2, form3):
+#         if third_form_class.is_valid():
+#             usua=form.save()
+#             cliente=form2.save()
+#             passw = form3.save()
+#             usuario = form.cleaned_data.get('username')
+#             password = form.cleaned_data.get('password')
+#             usuario = authenticate(username=usuario, password=password)
+#             cliente.save()
+#             usuario.save()
+#             response = redirect('/cliente/{}/'.format(self.request.user.id))
+#             return response
+
+@login_required
+def editar_cliente(request, id):
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+            response = redirect('/error/')
+            return response
+        hay_cliente = Cliente.objects.filter(user_id=request.user.id).exists()
+        if hay_cliente == True:
+            if request.method == 'POST':
+                print("rexqstcrv7qwiefgave97vftaw97fvws")
+                form1 = UserForm
+                form2 = ClienteModelForm
+                form3 = PasswordChangeForm(request.user, request.POST)
+                if form1.is_valid() and form2.is_valid() and form3.is_valid():
+                    usua=form.save()
+                    cliente=form2.save()
+                    passw = form3.save()
+                    usuario = form.cleaned_data.get('username')
+                    password = form.cleaned_data.get('password')
+                    usuario = authenticate(username=usuario, password=password)
+                    cliente.save()
+                    usuario.save()
+                    update_session_auth_hash(request, passw)  # Important!
+                else:
+                    response = redirect('/error/')
+                    return response
+            else:
+                form3 = PasswordChangeForm(request.user)
+            response = redirect('/cliente/{}/'.format(request.user.id))
+            return response
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
 
 @login_required
 def borrar_cliente(request, id):
@@ -288,6 +337,7 @@ def borrar_cliente(request, id):
         hay_cliente = Cliente.objects.filter(user_id=id).exists()
         if hay_cliente == True and str(request.user.id) == str(id):
             Cliente.objects.filter(user_id=id).delete()
+            User.objects.filter(id=id).delete()
             return redirect('/')
         else:
             response = redirect('/error/')
@@ -422,6 +472,7 @@ def borrar_empresa(request, id):
         hay_empresa = Empresa.objects.filter(user_id=id).exists()
         if hay_empresa == True and str(request.user.id) == str(id):
             Empresa.objects.filter(user_id=id).delete()
+            User.objects.filter(id=id).delete()
             return redirect('/')
         else:
             response = redirect('/error/')
