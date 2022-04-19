@@ -315,7 +315,7 @@ class EmpresaCreate(CreateView):
             usuario2 = User()
             usuario2.username = 'empleado_'+empresa.user.username
             usuario2.password = empresa.user.password
-            usuario2.email = empresa.user.email
+            usuario2.email = 'empleado_'+empresa.user.email
             usuario2.save()
             empleado.user = usuario2
             empleado.save()
