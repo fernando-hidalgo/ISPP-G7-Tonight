@@ -261,70 +261,51 @@ class ClientCreate(CreateView):
         return redirect('/login/')
 
 
-# class ClientEdit(UpdateView):
-#     # specify the model you want to use
-#     model = User
-#     template_name="editar_cliente.html"
-#     # specify the fields
-#     form_class = UserForm
-#     second_form_class = ClienteModelForm
+class ClientEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    second_model=Cliente
+    template_name="editar_cliente.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = ClienteModelForm
 
-#     def change_client(self):
-#         if request.method == 'POST':
-#             third_form_class = PasswordChangeForm(self.user, self.POST)
-#             if third_form_class.is_valid():
-#                 passw = third_form_class.save()
-#                 update_session_auth_hash(request, passw)
+    def get_context_data(self, **kwargs):
+        context = super(ClientEdit, self).get_context_data(**kwargs)
+        pk=self.kwargs.get('pk')
+        cliente=self.second_model.objects.get(id=pk)
+        user=self.model.objects.get(id=cliente.user.id)
+        context['form'] = self.form_class(instance=user)
+        context['form2'] = self.second_form_class(instance=cliente)
+        return context
 
-#     def form_valid(self, form, form2, form3):
-#         if third_form_class.is_valid():
-#             usua=form.save()
-#             cliente=form2.save()
-#             passw = form3.save()
-#             usuario = form.cleaned_data.get('username')
-#             password = form.cleaned_data.get('password')
-#             usuario = authenticate(username=usuario, password=password)
-#             cliente.save()
-#             usuario.save()
-#             response = redirect('/cliente/{}/'.format(self.request.user.id))
-#             return response
-
-@login_required
-def editar_cliente(request, id):
-    acceso = Cliente.objects.filter(user = request.user.id)
-    if(acceso):
-        if request.user.id == None:
-            response = redirect('/error/')
-            return response
-        hay_cliente = Cliente.objects.filter(user_id=request.user.id).exists()
-        if hay_cliente == True:
-            if request.method == 'POST':
-                print("rexqstcrv7qwiefgave97vftaw97fvws")
-                form1 = UserForm
-                form2 = ClienteModelForm
-                form3 = PasswordChangeForm(request.user, request.POST)
-                if form1.is_valid() and form2.is_valid() and form3.is_valid():
-                    usua=form.save()
-                    cliente=form2.save()
-                    passw = form3.save()
-                    usuario = form.cleaned_data.get('username')
-                    password = form.cleaned_data.get('password')
-                    usuario = authenticate(username=usuario, password=password)
-                    cliente.save()
-                    usuario.save()
-                    update_session_auth_hash(request, passw)  # Important!
-                else:
-                    response = redirect('/error/')
-                    return response
-            else:
-                form3 = PasswordChangeForm(request.user)
-            response = redirect('/cliente/{}/'.format(request.user.id))
-            return response
+    def post(self, request, *args, **kwargs):
+        self.object=self.get_object
+        id_cliente=kwargs['pk']
+        cliente=self.second_model.objects.get(id=id_cliente)
+        user=self.model.objects.get(id=cliente.user.id)
+        form = self.form_class(request.POST, instance=user)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=cliente)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/cliente/{}/'.format(self.request.user.id))
         else:
-            response = redirect('/error/')
-            return response
-    else:
-        return redirect('/')
+            return render (request, 'editar_cliente.html', {'form': form, 'form2': form2})
+
+    # def form_valid(self, form):
+    #     context=self.get_context_data()
+    #     user=context["user"]
+    #     self.object = form.save()
+    #     if user.is_valid():
+    #         user.instance=self.object
+    #         user.save()
+    #         response = redirect('/cliente/{}/'.format(self.request.user.id))
+    #     else:
+    #         response=redirect('/error')
+        
+    #     return response
 
 @login_required
 def borrar_cliente(request, id):
@@ -425,6 +406,39 @@ class EmpresaCreate(CreateView):
         password = form.cleaned_data.get('password')
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
+
+class EmpresaEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    second_model= Empresa
+    template_name="editar_cliente.html"
+    # specify the fields
+    form_class = UserForm
+    second_form_class = EmpresaModelForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpresaEdit, self).get_context_data(**kwargs)
+        pk=self.kwargs.get('pk')
+        empresa=self.second_model.objects.get(id=pk)
+        user=self.model.objects.get(id=cliente.user.id)
+        context['form'] = self.form_class(instance=user)
+        context['form2'] = self.second_form_class(instance=empresa)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object=self.get_object
+        id_empresa=kwargs['pk']
+        cliente=self.second_model.objects.get(id=id_empresa)
+        user=self.model.objects.get(id=cliente.user.id)
+        form = self.form_class(request.POST, instance=user)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=cliente)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/cliente/{}/'.format(self.request.user.id))
+        else:
+            return render (request, 'editar_cliente.html', {'form': form, 'form2': form2})
 
 class BusinnessProfile(LoginRequiredMixin, View):
     def get(self, request, id):

@@ -3,7 +3,7 @@ from django.urls import path,include
 from proyecto import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
-from proyecto.views import ClientProfile, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate, TerminosVista, NotificacionesView
+from proyecto.views import ClientProfile, EmpresaEdit, ClientEdit, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate, TerminosVista, NotificacionesView
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -13,9 +13,8 @@ urlpatterns = [
     path('eventosmapa/', views.mapa_eventos),
     path('eventos/', views.listar_eventos, name='payment_done'),
     path('cliente/<id>/', ClientProfile.as_view()),
-    path('cliente/<id>/editar', views.editar_cliente),
+    path('cliente/<pk>/editar', ClientEdit.as_view()),
     path('cliente/<id>/eliminar', views.borrar_cliente),
-    path('empresa/<id>/eliminar', views.borrar_empresa),
     path('cliente/<id>/saldo', views.recargar_saldo),
     path('saldo-exito/', views.payment_done, name='payment_done'),
     path('saldo-cancelado/', views.payment_canceled, name='payment_cancelled'),
@@ -28,6 +27,8 @@ urlpatterns = [
     
     #Accesible SOLO para Empresas
     path('empresa/<id>/', BusinnessProfile.as_view()),
+    path('empresa/<id>/eliminar', views.borrar_empresa),
+    path('empresa/<pk>/editar', EmpresaEdit.as_view()),
     path('eventos/<int:evento_id>/borrar', views.borrar_evento),
     path('eventos/<pk>/editar', VistaEditarEvento.as_view()),
     path('eventos/crear', views.crear_fiesta),
