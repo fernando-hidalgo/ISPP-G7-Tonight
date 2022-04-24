@@ -15,7 +15,7 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm
+from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm, EmpresaEditForm, UserEditForm
 from .models import Evento, Notificacion
 from django.utils import timezone
 import proyecto.qr
@@ -267,7 +267,7 @@ class ClientEdit(UpdateView):
     second_model=Cliente
     template_name="editar_cliente.html"
     # specify the fields
-    form_class = UserForm
+    form_class = UserEditForm
     second_form_class = ClienteModelForm
 
     def get_context_data(self, **kwargs):
@@ -411,34 +411,37 @@ class EmpresaEdit(UpdateView):
     # specify the model you want to use
     model = User
     second_model= Empresa
-    template_name="editar_cliente.html"
+    template_name="editar_empresa.html"
     # specify the fields
-    form_class = UserForm
-    second_form_class = EmpresaModelForm
+    form_class = UserEditForm
+    second_form_class = EmpresaEditForm
 
     def get_context_data(self, **kwargs):
         context = super(EmpresaEdit, self).get_context_data(**kwargs)
         pk=self.kwargs.get('pk')
         empresa=self.second_model.objects.get(id=pk)
-        user=self.model.objects.get(id=cliente.user.id)
-        context['form'] = self.form_class(instance=user)
-        context['form2'] = self.second_form_class(instance=empresa)
-        return context
+        user=self.model.objects.get(id=empresa.user.id)
+        if(user.id!= self.request.user.id):
+            return redirect('/error/')
+        else:
+            context['form'] = self.form_class(instance=user)
+            context['form2'] = self.second_form_class(instance=empresa)
+            return context
 
     def post(self, request, *args, **kwargs):
         self.object=self.get_object
         id_empresa=kwargs['pk']
-        cliente=self.second_model.objects.get(id=id_empresa)
-        user=self.model.objects.get(id=cliente.user.id)
+        empresa=self.second_model.objects.get(id=id_empresa)
+        user=self.model.objects.get(id=empresa.user.id)
         form = self.form_class(request.POST, instance=user)
-        form2 = self.second_form_class(request.POST, request.FILES, instance=cliente)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=empresa)
         if form.is_valid() and form2.is_valid():
             cliente = form2.save(commit=False)
             cliente.user = form.save()
             cliente.save()
-            return redirect('/cliente/{}/'.format(self.request.user.id))
+            return redirect('/empresa/{}/'.format(self.request.user.id))
         else:
-            return render (request, 'editar_cliente.html', {'form': form, 'form2': form2})
+            return render (request, 'editar_empresa.html', {'form': form, 'form2': form2})
 
 class BusinnessProfile(LoginRequiredMixin, View):
     def get(self, request, id):
