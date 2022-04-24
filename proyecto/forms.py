@@ -29,31 +29,6 @@ class UserForm(UserCreationForm):
         for field_name in ('username', 'email', 'password1', 'password2'):
             self.fields[field_name].help_text = ''
 
-
-class UserModelForm(ModelForm):
-    class Meta:
-        model = User
-        fields = [
-            'username',
-            'email',
-            'password',
-        ]
-        labels = {
-            'username': 'Nombre',
-            'email': 'Correo',
-            'password': 'Contraseña',
-        }
-        help_texts = {
-            'username': None,
-            'email': None,
-            'password': None,
-        }
-        
-    def __init__(self, *args, **kwargs):
-        super(UserModelForm, self).__init__(*args, **kwargs)
-        for field_name in ('username', 'email', 'password1', 'password2'):
-            self.fields[field_name].help_text = ''
-
         
 class ClienteModelForm(ModelForm):
     tlf = PhoneNumberField(widget = PhoneNumberPrefixWidget(initial='ES'))
@@ -132,13 +107,14 @@ class EmpresaEditForm(ModelForm):
         for field_name in ('tlf', 'imagen'):
             self.fields[field_name].help_text = ''
 
-class UserEditForm(UserForm):
+class UserEditForm(ModelForm):
     class Meta:
         model = User
         fields = [
             'username',
             'email',
         ]
+        exclude = ('password',)
         labels = {
             'username': 'Nombre',
             'email': 'Correo',
@@ -149,9 +125,7 @@ class UserEditForm(UserForm):
         }
     def __init__(self, *args, **kwargs):
         super(UserEditForm, self).__init__(*args, **kwargs)
-        self.fields['password1'].required = False
-        self.fields['password2'].required = False
-        for field_name in ('username', 'email', 'password1', 'password2'):
+        for field_name in ('username', 'email'):
             self.fields[field_name].help_text = ''
 
 class NumberInput(forms.NumberInput):

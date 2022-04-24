@@ -53,6 +53,9 @@ urlpatterns = [
     path('crear_cliente/', ClientCreate.as_view()),
     path('terminos/', TerminosVista.as_view()),
 
+    #Accesible para los ususarios de Cliente y Empresa
+    path('<pk>/password', views.cambiar_contra),
+
 ]
 
 if settings.DEBUG:

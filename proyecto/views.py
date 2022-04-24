@@ -16,6 +16,7 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
 from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm, EmpresaEditForm, UserEditForm
+from django.contrib.auth.forms import PasswordChangeForm
 from .models import Evento, Notificacion
 from django.utils import timezone
 import proyecto.qr
@@ -306,6 +307,28 @@ class ClientEdit(UpdateView):
     #         response=redirect('/error')
         
     #     return response
+
+def cambiar_contra(request, pk):
+    hay_cliente=Cliente.objects.filter(user_id=pk).exists()
+    hay_empresa=Empresa.objects.filter(user_id=pk).exists()
+    user=User.objects.get(id=pk)
+    if(request.user!=user):
+        return redirect('/error/')
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+        if hay_cliente:
+            cliente = Cliente.objects.get(user=user)
+            user2=form.save()
+            update_session_auth_hash(request,user2) 
+            return redirect('/cliente/{}/'.format(cliente.user.id))
+        if hay_empresa:
+            empresa= Empresa.objects.get(user=user)
+            user2=form.save()
+            update_session_auth_hash(request,user2) 
+            return redirect('/empresa/{}/'.format(empresa.user.id))
+    else:
+        return render (request, 'editar_contra.html', {'form': form})
+
 
 @login_required
 def borrar_cliente(request, id):
