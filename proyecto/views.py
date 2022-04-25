@@ -528,6 +528,7 @@ def ver_evento(request, evento_id):
     es_empleado = False
     entrada = None
     transaccion = None
+    entrada_used_cad = False
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     if hay_evento == True:
         if request.user.id==None:
@@ -555,6 +556,8 @@ def ver_evento(request, evento_id):
                 
                 if entrada_exists.count() > 0:
                     entrada = entrada_exists.first()
+                    if entrada.estado == 'U' or entrada.estado == 'C':
+                        entrada_used_cad = True
                 if transaccion_exists.count() > 0:
                     transaccion = transaccion_exists.first()
                     print(transaccion)
@@ -564,7 +567,7 @@ def ver_evento(request, evento_id):
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
                     "es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario, "has_entrada": entrada is not None,
-                     "hay_transaccion": transaccion is not None})
+                     "hay_transaccion": transaccion is not None, "entrada_used_cad": entrada_used_cad})
     else:
         response = redirect('/error/')
         return response
