@@ -59,20 +59,19 @@
 
     <section class="container profile-tickets-list-card">
         {% for x in eventos %}
-      <div class="row" style= "margin-top: 3%;">
-        <div class="column" style= "width: 20%;">
-          <p class="profile-text">{{x.nombre}}</p>
+      <div class="row" style="border-bottom:2px solid">
+        <div class="column" style= "width: 30%;margin-top:1rem">
+          <p style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden"class="profile-text">{{x.nombre}}</p>
         </div>
 
-        <div class="column" style= "width: 35%;">
+        <div class="column" style= "width: 30%;margin-top:1rem">
           <p class="profile-text">{{x.fecha|date:"d/m/Y" }}</p>
         </div>
 
-        <div class="column" style= "width: 30%;  margin-left: 10%">
+        <div class="column" style= "width: 30%;margin-top:1rem;margin-left: 10%">
           <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/{{ x.id }}'">Ver</button> 
         </div>
 
-        <hr class="divider" style="height: 3px;">
       </div>
       {%endfor%}
     </section>

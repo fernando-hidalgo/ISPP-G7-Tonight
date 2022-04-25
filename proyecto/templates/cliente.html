@@ -62,12 +62,12 @@
 
     <section class="container profile-tickets-list-card">
         {% for x in entradas %}
-            <div class="row">
-                <div class="column" style= "width: 20%;">
-                    <p > {{ x.evento.nombre }} </p>
+            <div class="row" style="border-bottom:2px solid">
+                <div class="column" style= "width: 32%;margin-top:1rem">
+                    <p style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden"> {{ x.evento.nombre }} </p>
                 </div>
 
-                <div class="column" style= "width: 35%;">
+                <div class="column" style= "width: 32%;margin-top:1rem">
                     {% if x.estado == 'A' %}
                     <p> Adquirida </p>
                     {% elif x.estado == 'E' %}
@@ -81,11 +81,11 @@
                     {%endif%}
                 </div>
 
-                <div class="column" style= "width: 45%;">
+                <div class="column" style= "width: 35%;margin-top:10px">
                     <a href="/eventos/{{x.evento.id}}"><input type="button" class="see-ticket-button text-white" value="Ver"></a>
                 </div>
 
-                <hr class="divider" style="height: 3px;">
+                
             </div>
         {%endfor%}
     </section>
