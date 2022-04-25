@@ -1,13 +1,14 @@
 {% extends "headers/header_CRUD.html" %}
 <html lang="en">
-<body>     
-    {% block content %} 
+<body>
+    {% block content %}  
         <div class="crear_evento" style="position:relative">
-            <h1>Crear Empleado:</h1>
+            <h1>Editar Empresa:</h1>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input type="submit" value="Registar"> 
+                {{ form2.as_p }}
+                <input type="submit" value="Guardar"> 
             </form>  
         </div>
     {% endblock %}

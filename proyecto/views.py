@@ -15,7 +15,8 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm
+from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm, EmpresaEditForm, UserEditForm
+from django.contrib.auth.forms import PasswordChangeForm
 from .models import Evento, Notificacion
 from django.utils import timezone
 import proyecto.qr
@@ -38,6 +39,8 @@ from geopy.geocoders import Nominatim
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 import json
 
 User = get_user_model()
@@ -258,6 +261,94 @@ class ClientCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
+
+class ClientEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    second_model=Cliente
+    template_name="editar_cliente.html"
+    # specify the fields
+    form_class = UserEditForm
+    second_form_class = ClienteModelForm
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientEdit, self).get_context_data(**kwargs)
+        pk=self.kwargs.get('pk')
+        cliente=self.second_model.objects.get(id=pk)
+        user=self.model.objects.get(id=cliente.user.id)
+        context['form'] = self.form_class(instance=user)
+        context['form2'] = self.second_form_class(instance=cliente)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object=self.get_object
+        id_cliente=kwargs['pk']
+        cliente=self.second_model.objects.get(id=id_cliente)
+        user=self.model.objects.get(id=cliente.user.id)
+        form = self.form_class(request.POST, instance=user)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=cliente)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/cliente/{}/'.format(self.request.user.id))
+        else:
+            return render (request, 'editar_cliente.html', {'form': form, 'form2': form2})
+
+    # def form_valid(self, form):
+    #     context=self.get_context_data()
+    #     user=context["user"]
+    #     self.object = form.save()
+    #     if user.is_valid():
+    #         user.instance=self.object
+    #         user.save()
+    #         response = redirect('/cliente/{}/'.format(self.request.user.id))
+    #     else:
+    #         response=redirect('/error')
+        
+    #     return response
+
+def cambiar_contra(request, pk):
+    hay_cliente=Cliente.objects.filter(user_id=pk).exists()
+    hay_empresa=Empresa.objects.filter(user_id=pk).exists()
+    user=User.objects.get(id=pk)
+    if(request.user!=user):
+        return redirect('/error/')
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+        if hay_cliente:
+            cliente = Cliente.objects.get(user=user)
+            user2=form.save()
+            update_session_auth_hash(request,user2) 
+            return redirect('/cliente/{}/'.format(cliente.user.id))
+        if hay_empresa:
+            empresa= Empresa.objects.get(user=user)
+            user2=form.save()
+            update_session_auth_hash(request,user2) 
+            return redirect('/empresa/{}/'.format(empresa.user.id))
+    else:
+        return render (request, 'editar_contra.html', {'form': form})
+
+
+@login_required
+def borrar_cliente(request, id):
+    #Solo ese usuario tiene acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_cliente = Cliente.objects.filter(user_id=id).exists()
+        if hay_cliente == True and str(request.user.id) == str(id):
+            Cliente.objects.filter(user_id=id).delete()
+            User.objects.filter(id=id).delete()
+            return redirect('/')
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
+
 class EmpleadoCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     # specify the model you want to use
     model = Empleado
@@ -339,6 +430,42 @@ class EmpresaCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
+class EmpresaEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    second_model= Empresa
+    template_name="editar_empresa.html"
+    # specify the fields
+    form_class = UserEditForm
+    second_form_class = EmpresaEditForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpresaEdit, self).get_context_data(**kwargs)
+        pk=self.kwargs.get('pk')
+        empresa=self.second_model.objects.get(id=pk)
+        user=self.model.objects.get(id=empresa.user.id)
+        if(user.id!= self.request.user.id):
+            return redirect('/error/')
+        else:
+            context['form'] = self.form_class(instance=user)
+            context['form2'] = self.second_form_class(instance=empresa)
+            return context
+
+    def post(self, request, *args, **kwargs):
+        self.object=self.get_object
+        id_empresa=kwargs['pk']
+        empresa=self.second_model.objects.get(id=id_empresa)
+        user=self.model.objects.get(id=empresa.user.id)
+        form = self.form_class(request.POST, instance=user)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=empresa)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/empresa/{}/'.format(self.request.user.id))
+        else:
+            return render (request, 'editar_empresa.html', {'form': form, 'form2': form2})
+
 class BusinnessProfile(LoginRequiredMixin, View):
     def get(self, request, id):
         #Solo las Empresas tienen acceso a su propio perfil
@@ -373,6 +500,25 @@ class BusinnessProfile(LoginRequiredMixin, View):
                 return response
         else:
             return redirect('/')
+
+@login_required
+def borrar_empresa(request, id):
+    #Solo ese usuario tiene acceso
+    acceso = Empresa.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_empresa = Empresa.objects.filter(user_id=id).exists()
+        if hay_empresa == True and str(request.user.id) == str(id):
+            Empresa.objects.filter(user_id=id).delete()
+            User.objects.filter(id=id).delete()
+            return redirect('/')
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
 
 @login_required
 def ver_evento(request, evento_id): 
