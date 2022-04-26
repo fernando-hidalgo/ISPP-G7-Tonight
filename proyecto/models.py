@@ -16,13 +16,13 @@ class Cliente(models.Model):
     user = models.OneToOneField(User, related_name='user_c', on_delete=models.CASCADE)
     saldo = models.PositiveIntegerField()
     tlf = PhoneNumberField(unique = True)
-    imagen = models.ImageField(upload_to='media/')
+    imagen = models.ImageField(upload_to='clientes')
 
 class Empresa(models.Model):
     user = models.OneToOneField(User, related_name='user_eprs', on_delete=models.CASCADE)
     tlf = PhoneNumberField(unique = True)
     cif = ESIdentityCardNumberField(unique = True)
-    imagen = models.ImageField(upload_to='media/')
+    imagen = models.ImageField(upload_to='empresas')
 
 
 class Evento(models.Model):
@@ -34,7 +34,7 @@ class Evento(models.Model):
     ubicacion = models.CharField('Ubicación', max_length=100)
     salt = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='empresa')
-    imagen = models.ImageField('Imagen', upload_to='media/')
+    imagen = models.ImageField('Imagen', upload_to='eventos')
     latitud= models.FloatField('Latitud')
     longitud= models.FloatField('Longitud')
     STATUS = (
@@ -74,3 +74,8 @@ class Transaccion(models.Model):
 class Empleado(models.Model):
     user = models.OneToOneField(User, related_name='user_epld', on_delete=models.CASCADE)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+
+class Notificacion(models.Model):
+    mensaje = models.TextField('mensaje', max_length=500)
+    read = models.BooleanField(default=False)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='usuario_notificacion')

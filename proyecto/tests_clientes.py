@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+from psycopg2.errors import CheckViolation
 import time
 import os
 from .models import Cliente, Empresa
@@ -38,7 +39,7 @@ class ClienteTestCase(StaticLiveServerTestCase):
         try:
             cliente2.save()
         except IntegrityError as e:
-            self.assertIn('Duplicate entry',str(e))
+            self.assertIn('duplicate key value violates unique constraint "proyecto_cliente_user_id_key"',str(e))
     
 
     def test_negative_tlf(self):
@@ -59,8 +60,8 @@ class ClienteTestCase(StaticLiveServerTestCase):
         cliente=Cliente(user=User.objects.get(username='admin'),tlf='+41689864699',saldo=-1000)
         try:
             cliente.save()
-        except DataError as e:
-         self.assertIn('Out of range value for column', str(e))
+        except IntegrityError as e:
+            self.assertIn('violates check constraint "proyecto_cliente_saldo_check"', str(e))
 
 
     def test_no_hay_saldo(self):
@@ -68,7 +69,7 @@ class ClienteTestCase(StaticLiveServerTestCase):
         try:
             cliente.save()
         except IntegrityError as e:
-            self.assertIn("Column 'saldo' cannot be null",str(e))
+            self.assertIn('null value in column "saldo" violates not-null constraint',str(e))
 
     def test_no_hay_tlf(self):
         cliente= Cliente(user=User.objects.get(username='admin'),saldo=1000)
@@ -82,7 +83,7 @@ class ClienteTestCase(StaticLiveServerTestCase):
         try:
             cliente.save()
         except IntegrityError as e:
-            self.assertIn("Column 'user_id' cannot be null",str(e))
+            self.assertIn('null value in column "user_id" violates not-null constraint',str(e))
 
 class SeleniumTestCase(StaticLiveServerTestCase):
 
@@ -117,7 +118,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+41524204242")
         self.driver.find_element(By.ID, "id_saldo").send_keys("1000")
-        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        absolute_file_path = os.path.abspath("media/media/test.jpg")
         self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
         

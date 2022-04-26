@@ -50,10 +50,15 @@
                   <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/cancelar'">
                     Cancelar</button>
                   {% else %}
-                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/vender'">
-                    Vender</button>
-                  <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/qr'">
-                    Ver entrada</button>
+                    {%if entrada_used_cad %}
+                    <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/qr'">
+                      Ver entrada</button>
+                    {% else %}
+                    <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/vender'">
+                      Vender</button>
+                    <button type="button" class="party-button text-white" onclick="location.href='{{evento.id}}/qr'">
+                      Ver entrada</button>
+                    {% endif %}
                   {% endif %}
                 {% else %}
                     {% if evento.totalEntradas == 0 %}

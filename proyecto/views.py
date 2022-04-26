@@ -1,3 +1,4 @@
+from re import template
 from urllib import request
 from django import forms
 from django.contrib import messages
@@ -14,8 +15,9 @@ from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 from django.views.generic.edit import UpdateView, CreateView
-from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm
-from .models import Evento
+from .forms import UserForm, ClienteModelForm, EmpresaModelForm, FiestaForm, FiestaEditForm, EmpresaEditForm, UserEditForm
+from django.contrib.auth.forms import PasswordChangeForm
+from .models import Evento, Notificacion
 from django.utils import timezone
 import proyecto.qr
 import proyecto.entrada
@@ -28,6 +30,7 @@ import datetime
 from proyecto.forms import TransactionForm
 from proyecto.transacciones import poner_venta,poner_compra
 from proyecto.entrada import create_entrada
+import proyecto.notificaciones
 from django.conf import settings
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.csrf import csrf_exempt
@@ -36,6 +39,8 @@ from geopy.geocoders import Nominatim
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 import json
 
 User = get_user_model()
@@ -178,6 +183,9 @@ class ErrorVista(TemplateView):
 class WelcomeVista(TemplateView):
     template_name = 'welcome.html'
 
+class TerminosVista(TemplateView):
+    template_name = 'terminos.html'
+
 class ClientProfile(LoginRequiredMixin, View):
     def get(self, request, id):
         #Solo los Clientes tienen acceso a su propio perfil
@@ -196,15 +204,18 @@ class ClientProfile(LoginRequiredMixin, View):
                 else:
                     cliente = Cliente.objects.get(user=usuario)
                     hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
+                    notificaciones = proyecto.notificaciones.count_unread_notificaciones(request.user.id)
                     if hayEntradas == True:
                         entradas = Entrada.objects.filter(cliente=cliente)
                         context = {
                             'cliente': cliente,
-                            'entradas': entradas
+                            'entradas': entradas,
+                            'notificaciones': notificaciones
                         }
                     else:
                         context = {
-                            'cliente': cliente
+                            'cliente': cliente,
+                            'notificaciones': notificaciones
                         }
                     return render (request, 'cliente.html', context)
             else:
@@ -249,6 +260,94 @@ class ClientCreate(CreateView):
         password = form.cleaned_data.get('password')
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
+
+
+class ClientEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    second_model=Cliente
+    template_name="editar_cliente.html"
+    # specify the fields
+    form_class = UserEditForm
+    second_form_class = ClienteModelForm
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientEdit, self).get_context_data(**kwargs)
+        pk=self.kwargs.get('pk')
+        cliente=self.second_model.objects.get(id=pk)
+        user=self.model.objects.get(id=cliente.user.id)
+        context['form'] = self.form_class(instance=user)
+        context['form2'] = self.second_form_class(instance=cliente)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object=self.get_object
+        id_cliente=kwargs['pk']
+        cliente=self.second_model.objects.get(id=id_cliente)
+        user=self.model.objects.get(id=cliente.user.id)
+        form = self.form_class(request.POST, instance=user)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=cliente)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/cliente/{}/'.format(self.request.user.id))
+        else:
+            return render (request, 'editar_cliente.html', {'form': form, 'form2': form2})
+
+    # def form_valid(self, form):
+    #     context=self.get_context_data()
+    #     user=context["user"]
+    #     self.object = form.save()
+    #     if user.is_valid():
+    #         user.instance=self.object
+    #         user.save()
+    #         response = redirect('/cliente/{}/'.format(self.request.user.id))
+    #     else:
+    #         response=redirect('/error')
+        
+    #     return response
+
+def cambiar_contra(request, pk):
+    hay_cliente=Cliente.objects.filter(user_id=pk).exists()
+    hay_empresa=Empresa.objects.filter(user_id=pk).exists()
+    user=User.objects.get(id=pk)
+    if(request.user!=user):
+        return redirect('/error/')
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+        if hay_cliente:
+            cliente = Cliente.objects.get(user=user)
+            user2=form.save()
+            update_session_auth_hash(request,user2) 
+            return redirect('/cliente/{}/'.format(cliente.user.id))
+        if hay_empresa:
+            empresa= Empresa.objects.get(user=user)
+            user2=form.save()
+            update_session_auth_hash(request,user2) 
+            return redirect('/empresa/{}/'.format(empresa.user.id))
+    else:
+        return render (request, 'editar_contra.html', {'form': form})
+
+
+@login_required
+def borrar_cliente(request, id):
+    #Solo ese usuario tiene acceso
+    acceso = Cliente.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_cliente = Cliente.objects.filter(user_id=id).exists()
+        if hay_cliente == True and str(request.user.id) == str(id):
+            Cliente.objects.filter(user_id=id).delete()
+            User.objects.filter(id=id).delete()
+            return redirect('/')
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
 
 class EmpleadoCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     # specify the model you want to use
@@ -331,6 +430,42 @@ class EmpresaCreate(CreateView):
         usuario = authenticate(username=usuario, password=password)
         return redirect('/login/')
 
+class EmpresaEdit(UpdateView):
+    # specify the model you want to use
+    model = User
+    second_model= Empresa
+    template_name="editar_empresa.html"
+    # specify the fields
+    form_class = UserEditForm
+    second_form_class = EmpresaEditForm
+
+    def get_context_data(self, **kwargs):
+        context = super(EmpresaEdit, self).get_context_data(**kwargs)
+        pk=self.kwargs.get('pk')
+        empresa=self.second_model.objects.get(id=pk)
+        user=self.model.objects.get(id=empresa.user.id)
+        if(user.id!= self.request.user.id):
+            return redirect('/error/')
+        else:
+            context['form'] = self.form_class(instance=user)
+            context['form2'] = self.second_form_class(instance=empresa)
+            return context
+
+    def post(self, request, *args, **kwargs):
+        self.object=self.get_object
+        id_empresa=kwargs['pk']
+        empresa=self.second_model.objects.get(id=id_empresa)
+        user=self.model.objects.get(id=empresa.user.id)
+        form = self.form_class(request.POST, instance=user)
+        form2 = self.second_form_class(request.POST, request.FILES, instance=empresa)
+        if form.is_valid() and form2.is_valid():
+            cliente = form2.save(commit=False)
+            cliente.user = form.save()
+            cliente.save()
+            return redirect('/empresa/{}/'.format(self.request.user.id))
+        else:
+            return render (request, 'editar_empresa.html', {'form': form, 'form2': form2})
+
 class BusinnessProfile(LoginRequiredMixin, View):
     def get(self, request, id):
         #Solo las Empresas tienen acceso a su propio perfil
@@ -367,6 +502,25 @@ class BusinnessProfile(LoginRequiredMixin, View):
             return redirect('/')
 
 @login_required
+def borrar_empresa(request, id):
+    #Solo ese usuario tiene acceso
+    acceso = Empresa.objects.filter(user = request.user.id)
+    if(acceso):
+        if request.user.id == None:
+                response = redirect('/error/')
+                return response
+        hay_empresa = Empresa.objects.filter(user_id=id).exists()
+        if hay_empresa == True and str(request.user.id) == str(id):
+            Empresa.objects.filter(user_id=id).delete()
+            User.objects.filter(id=id).delete()
+            return redirect('/')
+        else:
+            response = redirect('/error/')
+            return response
+    else:
+        return redirect('/')
+
+@login_required
 def ver_evento(request, evento_id): 
     no_log = True
     no_duenho = False
@@ -374,6 +528,7 @@ def ver_evento(request, evento_id):
     es_empleado = False
     entrada = None
     transaccion = None
+    entrada_used_cad = False
     hay_evento = Evento.objects.filter(id=evento_id).exists()
     if hay_evento == True:
         if request.user.id==None:
@@ -396,17 +551,23 @@ def ver_evento(request, evento_id):
             if cliente_exists:
                 cliente = Cliente.objects.get(user = usuario)
                 no_duenho = True
-                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento, estado = 'A')
+                entrada_exists = Entrada.objects.filter(cliente = cliente, evento = evento).exclude(estado='V')
                 transaccion_exists = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N')
+                
                 if entrada_exists.count() > 0:
                     entrada = entrada_exists.first()
+                    if entrada.estado == 'U' or entrada.estado == 'C':
+                        entrada_used_cad = True
                 if transaccion_exists.count() > 0:
                     transaccion = transaccion_exists.first()
+                    print(transaccion)
+                    print(transaccion is not None)
+                    print(entrada is not None)
             elif empresa_exists:
                 es_duenho = evento.empresa==Empresa.objects.get(user = usuario)
             return render(request,'detalles_evento.html', {"evento":evento,"no_log":no_log,"no_duenho":no_duenho,
                     "es_duenho":es_duenho,"es_empleado":es_empleado,"user":usuario, "has_entrada": entrada is not None,
-                     "hay_transaccion": transaccion is not None})
+                     "hay_transaccion": transaccion is not None, "entrada_used_cad": entrada_used_cad})
     else:
         response = redirect('/error/')
         return response
@@ -423,6 +584,7 @@ def borrar_evento(request, evento_id):
         if hay_evento == True:
             Evento.objects.filter(pk=evento_id).delete()
             eventos = Evento.objects.all()
+            proyecto.notificaciones.send_notificacion(request.user.id, "Se ha borrado el evento de manera satisfactoria")
             return redirect('/empresa/'+str(request.user.id)+'/')
         else:
             response = redirect('/error/')
@@ -557,6 +719,7 @@ def vender(request, evento_id):
                     return redirect("/eventos/"+str(evento.id)+"/vender")
                 cliente = Cliente.objects.get(user = usuario)
                 poner_venta(request,evento,cliente,fechLimite)
+                proyecto.notificaciones.send_notificacion(usuario.id, "Se ha puesta a la venta una entrada para " + evento.nombre)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -582,6 +745,7 @@ def orden_comprar(request, evento_id):
                     return redirect("/eventos/"+str(evento.id)+"/orden_comprar")
                 cliente = Cliente.objects.get(user = usuario)
                 poner_compra(request,evento, cliente, fechLimite)
+                proyecto.notificaciones.send_notificacion(usuario.id, "Se ha creado una orden de compra para " + evento.nombre)
             return redirect(ver_evento, evento_id=evento.id)
         else:
             form = proyecto.forms.TransactionForm()
@@ -599,6 +763,7 @@ def cancelar_transaccion(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         transaccion = Transaccion.objects.filter(cliente = cliente, evento = evento, done = False).exclude(tipo = 'N').first()
         proyecto.transacciones.cancelar_transaccion(transaccion)
+        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha concelado la venta de la entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
@@ -612,6 +777,7 @@ def compra_directa(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         evento = Evento.objects.get(id=evento_id)
         create_entrada(request,cliente,evento)
+        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha comprado una entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
@@ -658,8 +824,21 @@ def payment_done(request):
     
     cliente.saldo += rec
     cliente.save()
+    proyecto.notificaciones.send_notificacion(o_user.id, "Se ha recargado el saldo de manera satisfactoria")
     return render(request, 'saldo_exito.html', {'cantidad': rec, 'total': cliente.saldo})
 
 @csrf_exempt
 def payment_canceled(request):
     return render(request, 'saldo_cancelado.html')
+
+class NotificacionesView(LoginRequiredMixin, View):
+    def get(self, request):
+        proyecto.notificaciones.set_read_notificaciones(request.user.id)
+        notificaciones = proyecto.notificaciones.get_notificaciones(request.user.id)
+        return render(request,'notificaciones.html', {"notificaciones":notificaciones})
+
+@login_required    
+def borra_notificacion(request, notificacion_id):
+    o_user = User.objects.get(id=request.user.id)
+    proyecto.notificaciones.delete_notificacion(notificacion_id)
+    return NotificacionesView.as_view()(request)

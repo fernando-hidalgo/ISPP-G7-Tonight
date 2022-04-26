@@ -69,7 +69,7 @@ class EmpresaTestCase(TransactionTestCase):
         try:
             empresa.save()
         except DataError as e:
-         self.assertIn('Data too long for column', str(e))
+         self.assertIn('value too long for type character varying(9)', str(e))
 
     def test_cif_formato_incorrecto(self):
         empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='xfrt47')
@@ -85,7 +85,7 @@ class EmpresaTestCase(TransactionTestCase):
         try:
             empresa2.save()
         except IntegrityError as e:
-            self.assertIn('Duplicate entry', str(e))
+            self.assertIn('duplicate key value violates unique constraint "proyecto_empresa_tlf_key"', str(e))
 
     def test_tlf_duplicado(self):
         usuario = User(username='pablo', is_staff=True,  is_superuser=True, first_name='pablo', last_name='last_name_admin', email='pablo@gmail.com')
@@ -96,18 +96,18 @@ class EmpresaTestCase(TransactionTestCase):
         try:
             empresa2.save()
         except IntegrityError as e:
-            self.assertIn('Duplicate entry', str(e))
+            self.assertIn('duplicate key value violates unique constraint "proyecto_empresa_tlf_key"', str(e))
 
-    # def test_cif_duplicado(self):
-    #     usuario = User(username='pablo', is_staff=True,  is_superuser=True, first_name='pablo', last_name='last_name_admin', email='pablo@gmail.com')
-    #     usuario.save()
-    #     empresa1 = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
-    #     empresa1.save()
-    #     empresa2 = Empresa(user=User.objects.get(username='pablo'), tlf='+41524204241', cif='H71336523')
-    #     try:
-    #         empresa2.save()
-    #     except IntegrityError as e:
-    #         self.assertIn('Duplicate entry', str(e))
+    def test_cif_duplicado(self):
+        usuario = User(username='pablo', is_staff=True,  is_superuser=True, first_name='pablo', last_name='last_name_admin', email='pablo@gmail.com')
+        usuario.save()
+        empresa1 = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
+        empresa1.save()
+        empresa2 = Empresa(user=User.objects.get(username='pablo'), tlf='+41524204241', cif='H71336523')
+        try:
+            empresa2.save()
+        except IntegrityError as e:
+            self.assertIn('duplicate key value violates unique constraint "proyecto_empresa_cif', str(e))
 
     def test_tlf_negativo(self):
         empresa = Empresa(user=User.objects.get(username='admin'), tlf='-41524204242')
@@ -164,7 +164,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+41524204242")
         self.driver.find_element(By.ID, "id_cif").send_keys("09853118X")
-        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        absolute_file_path = os.path.abspath("media/media/test.jpg")
         self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
 

@@ -29,31 +29,6 @@ class UserForm(UserCreationForm):
         for field_name in ('username', 'email', 'password1', 'password2'):
             self.fields[field_name].help_text = ''
 
-
-class UserModelForm(ModelForm):
-    class Meta:
-        model = User
-        fields = [
-            'username',
-            'email',
-            'password',
-        ]
-        labels = {
-            'username': 'Nombre',
-            'email': 'Correo',
-            'password': 'Contraseña',
-        }
-        help_texts = {
-            'username': None,
-            'email': None,
-            'password': None,
-        }
-        
-    def __init__(self, *args, **kwargs):
-        super(UserModelForm, self).__init__(*args, **kwargs)
-        for field_name in ('username', 'email', 'password1', 'password2'):
-            self.fields[field_name].help_text = ''
-
         
 class ClienteModelForm(ModelForm):
     tlf = PhoneNumberField(widget = PhoneNumberPrefixWidget(initial='ES'))
@@ -72,6 +47,7 @@ class ClienteModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(ClienteModelForm, self).__init__(*args, **kwargs)
         self.fields['tlf'].required = True
+        self.fields['imagen'].required = True
         for field_name in ('tlf', 'imagen'):
             self.fields[field_name].help_text = ''
 
@@ -107,6 +83,50 @@ class EmpresaModelForm(ModelForm):
         if cif_str[:8].isdigit():
             raise forms.ValidationError('No es un cif')
         return cif
+
+class EmpresaEditForm(ModelForm):
+    tlf = PhoneNumberField(
+        widget = PhoneNumberPrefixWidget(initial='ES')
+    )
+    class Meta:
+        model = Empresa
+        exclude = ('user', 'cif',)
+        fields = ['tlf', "imagen",]
+        labels = {
+            'tlf': 'Número de teléfono',
+            'imagen': 'Imagen',
+        }
+        help_texts = {
+            'tlf': None,
+            'imagen': None,
+        }
+    def __init__(self, *args, **kwargs):
+        super(EmpresaEditForm, self).__init__(*args, **kwargs)
+        self.fields['imagen'].required = True
+        self.fields['tlf'].required = True
+        for field_name in ('tlf', 'imagen'):
+            self.fields[field_name].help_text = ''
+
+class UserEditForm(ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+        ]
+        exclude = ('password',)
+        labels = {
+            'username': 'Nombre',
+            'email': 'Correo',
+        }
+        help_texts = {
+            'username': None,
+            'email': None,
+        }
+    def __init__(self, *args, **kwargs):
+        super(UserEditForm, self).__init__(*args, **kwargs)
+        for field_name in ('username', 'email'):
+            self.fields[field_name].help_text = ''
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'
