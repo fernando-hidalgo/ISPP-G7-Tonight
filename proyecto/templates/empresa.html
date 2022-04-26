@@ -26,35 +26,34 @@
         </div>
       </div>
       
-      <div class="row" style= "margin-top: 3%;">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/empleados/crear'">Crear empleado</button> 
-        </div>
-      </div>
-
+    
       <div class="row">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/eventos/crear'">Crear evento</button> 
+        <div class="col-2">
+          <button style="position: relative; margin-left: 50%; margin-right: 50%;" class="btn" onclick ="location.href='/empleados/crear'">
+            <i class="bi bi-person-plus-fill" style="font-size: 3rem; color: #A017E0;"></i>
+          </button>
         </div>
-      </div>
+        <div class="col-2">
+          <button style="position: relative; margin-left: 50%; margin-right: 50%;" class="btn" onclick ="location.href='/eventos/crear'">
+            <i class="bi bi-calendar-plus-fill" style="font-size: 3rem; color: #A017E0;"></i>
+          </button>
+        </div>
+        <div class="col-2">
+          <button style="position: relative; margin-left: 50%; margin-right: 50%;" class="btn" onclick ="location.href='/empresa/{{empresa.id}}/editar'">
+            <i class="bi bi-person-circle" style="font-size: 3rem; color: #A017E0;"></i>
+          </button>
+        </div>
+        <div class="col-2">
+          <button style="position: relative; margin-left: 50%; margin-right: 50%;" class="btn" onclick ="location.href='/{{empresa.user.id}}/password'">
+            <i class="bi bi-lock-fill" style="font-size: 3rem; color: #A017E0;"></i>
+          </button>
+        </div>
+        <div class="col-2">
+          <button style="position: relative; margin-left: 50%; margin-right: 50%;" class="btn" onclick ="location.href='/empresa/{{user.id}}/eliminar'">
+            <i class="bi bi-trash-fill" style="font-size: 3rem; color: #A017E0;"></i>
+          </button>
+        </div>
 
-      <div class="row" style= "margin-top: 3%;">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/empresa/{{empresa.id}}/editar'">Editar perfil</button> 
-        </div>
-      </div>
-
-      <div class="row" style= "margin-top: 3%;">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/{{empresa.user.id}}/password'">Cambiar Contraseña</button> 
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="container">
-          <button type="button" class="see-ticket-button text-white" onclick="location.href='/empresa/{{user.id}}/eliminar'">Borrar cuenta empresarial</button> 
-        </div>
-      </div>
     </section>
 
     <section class="container profile-tickets-list-card">
