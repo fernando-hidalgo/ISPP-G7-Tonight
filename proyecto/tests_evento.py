@@ -55,16 +55,16 @@ class EventosTestCase(TransactionTestCase):
         empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         try:
             evento.save()
-        except DataError as e:
-            self.assertIn('Out of range value for column',str(e))
+        except IntegrityError as e:
+            self.assertIn('new row for relation "proyecto_evento" violates check constraint "proyecto_evento_precioEntrada_check"',str(e))
 
     def test_totalEntradas_negativo(self):
         evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=-5, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
         empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
         try:
             evento.save()
-        except DataError as e:
-            self.assertIn('Out of range value for column',str(e))
+        except IntegrityError as e:
+            self.assertIn('new row for relation "proyecto_evento" violates check constraint "proyecto_evento_totalEntradas_check"',str(e))
 
 class SeleniumTestCase(StaticLiveServerTestCase):
 
@@ -77,9 +77,9 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         user_admin.save()
         empresa = Empresa(user=User.objects.get(username='admin'), tlf='+34671678336', cif='09853118X')
         empresa.save()
-        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
-        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
-        evento.save()
+        # evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
+        # empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
+        # evento.save()
 
         options = webdriver.ChromeOptions()
         options.headless = False
@@ -90,8 +90,8 @@ class SeleniumTestCase(StaticLiveServerTestCase):
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
-
-    def test_crear_evento(self):                    
+    
+    def crear_evento(self):
         self.driver.get(f'{self.live_server_url}/admin/')
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("admin")
@@ -103,7 +103,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+34676678336")
         self.driver.find_element(By.ID, "id_cif").send_keys("Q2826000H")
-        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        absolute_file_path = os.path.abspath("media/media/test.jpg")
         self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
 
@@ -126,15 +126,21 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_nombre").send_keys("occo")
         self.driver.find_element(By.ID, "id_descripcion").send_keys("Fiesta en occo")
         self.driver.find_element(By.ID, "id_ubicacion").send_keys("Sevilla")
-        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        absolute_file_path = os.path.abspath("media/media/test.jpg")
         self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         time.sleep(5)
         self.driver.find_element_by_name("save").click()
 
-        self.assertEqual(Evento.objects.count(), 2)
+    def test_crear_evento(self):                    
+        self.crear_evento()
+
+        self.assertEqual(Evento.objects.count(), 1)
 
     def test_ver_eventos(self):
+        evento = Evento(fecha=datetime(2022, 4, 16, 21, 00), precioEntrada=10, totalEntradas=50, nombre='Fiesta1', descripcion='Fiesta1', ubicacion='sevilla',salt= '1', 
+        empresa=Empresa.objects.get(id=1), latitud=10, longitud=11)
+        evento.save()
         self.driver.get(f'{self.live_server_url}')
         self.driver.find_element(By.NAME, "Acceder").click()
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
@@ -144,6 +150,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         assert 'Fiesta1' in self.driver.page_source
 
     def test_ver_evento(self):
+        self.crear_evento()
         self.driver.get(f'{self.live_server_url}')
         self.driver.find_element(By.NAME, "Acceder").click()
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
@@ -152,6 +159,6 @@ class SeleniumTestCase(StaticLiveServerTestCase):
 
         element = self.driver.find_element_by_xpath("//*[contains(text(), 'Ver')]")
         self.driver.execute_script("arguments[0].click();", element)
-
-        assert 'Fiesta1' in self.driver.page_source and '16/04/2022 21:00' in self.driver.page_source and '10€' in self.driver.page_source
+        
+        assert 'occo' in self.driver.page_source and '12/06/2022 21:00' in self.driver.page_source and '12€' in self.driver.page_source
         
