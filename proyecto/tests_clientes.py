@@ -118,7 +118,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         select.select_by_value('1')
         self.driver.find_element(By.ID, "id_tlf").send_keys("+41524204242")
         self.driver.find_element(By.ID, "id_saldo").send_keys("1000")
-        absolute_file_path = os.path.abspath("media/akoq18ldsxp51.png")
+        absolute_file_path = os.path.abspath("media/media/test.jpg")
         self.driver.find_element(By.ID, "id_imagen").send_keys(absolute_file_path)
         self.driver.find_element_by_name("_save").click()
         
