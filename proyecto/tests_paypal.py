@@ -60,5 +60,6 @@ class SeleniumTestCase(StaticLiveServerTestCase):
 
         time.sleep(3)
         self.driver.find_element_by_xpath("//*[contains(text(), 'Volver al vendedor')]").click()
+        time.sleep(10)
 
         assert Cliente.objects.get(id=1).saldo != 0
