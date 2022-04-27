@@ -20,6 +20,7 @@ def create_entrada(request, cliente, evento):
             evento.totalEntradas -= 1
             evento.save()
             cliente.save()
+            proyecto.notificaciones.send_notificacion(cliente.user.id, "Se ha comprado una entrada para " + evento.nombre)
             Entrada.objects.create(fechaCompra=datetime.date.today(), 
                 fechaCaducidad=evento.fecha + datetime.timedelta(days=1), 
                 estado='A',
