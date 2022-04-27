@@ -57,8 +57,6 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "password").send_keys("2A=[U#o^")
         self.driver.find_element(By.ID, "password").send_keys(Keys.ENTER)
 
-        # time.sleep(5)
-        self.driver.find_element(By.ID, "acceptAllButton").click()
         element = self.driver.find_element(By.ID, "payment-submit-btn")
         actions = ActionChains(self.driver)
         actions.move_to_element(element).perform()
