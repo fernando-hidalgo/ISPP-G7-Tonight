@@ -62,4 +62,4 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         self.driver.find_element_by_xpath("//*[contains(text(), 'Volver al vendedor')]").click()
         time.sleep(2)
 
-        assert 'Éxito, has recargado 30€' in self.driver.page_source
+        assert 'Éxito, has recargado' in self.driver.page_source
