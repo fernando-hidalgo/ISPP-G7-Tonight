@@ -60,6 +60,5 @@ class SeleniumTestCase(StaticLiveServerTestCase):
 
         time.sleep(3)
         self.driver.find_element_by_xpath("//*[contains(text(), 'Volver al vendedor')]").click()
-        time.sleep(2)
 
-        assert 'Éxito, has recargado' in self.driver.page_source
+        assert Cliente.objects.get(id=1).saldo == 30
