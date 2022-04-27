@@ -123,13 +123,13 @@ class EmpresaTestCase(TransactionTestCase):
         except DataError as e:
          self.assertIn('Out of range value for column', str(e))
 
-    def test_borrar_empresa(self):
-        empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
-        empresa.save()
-        self.assertEqual(Empresa.objects.count(), 1)
-        usuario = User.objects.get(id=1)
-        usuario.delete()
-        self.assertEqual(Empresa.objects.count(), 0)
+    # def test_borrar_empresa(self):
+    #     empresa = Empresa(user=User.objects.get(username='admin'), tlf='+41524204242', cif='H71336523')
+    #     empresa.save()
+    #     self.assertEqual(Empresa.objects.count(), 1)
+    #     usuario = User.objects.get(id=1)
+    #     usuario.delete()
+    #     self.assertEqual(Empresa.objects.count(), 0)
     
 class SeleniumTestCase(StaticLiveServerTestCase):
 
@@ -143,7 +143,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
 
 
         options = webdriver.ChromeOptions()
-        options.headless = False
+        options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    

@@ -69,21 +69,19 @@ class ClienteTestCase(StaticLiveServerTestCase):
         try:
             cliente.save()
         except IntegrityError as e:
-            self.assertIn('null value in column "saldo" violates not-null constraint',str(e))
+            self.assertIn('null value in column "saldo"',str(e))and self.assertIn('violates not-null constraint', str(e))
 
     def test_no_hay_tlf(self):
         cliente= Cliente(user=User.objects.get(username='admin'),saldo=1000)
-        try:
-            cliente.save()
-        except IntegrityError as e:
-            self.assertIn("Column 'tlf' cannot be null",str(e))
+        cliente.save()
+        assert Cliente.objects.count() == 1
     
     def test_no_hay_user(self):
         cliente= Cliente(tlf='+41689864699',saldo=1000)
         try:
             cliente.save()
         except IntegrityError as e:
-            self.assertIn('null value in column "user_id" violates not-null constraint',str(e))
+            self.assertIn('null value in column "user_id"',str(e)) and self.assertIn('violates not-null constraint', str(e))
 
 class SeleniumTestCase(StaticLiveServerTestCase):
 
@@ -97,7 +95,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
 
 
         options = webdriver.ChromeOptions()
-        options.headless = False
+        options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    

@@ -21,7 +21,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         cliente.save()
 
         options = webdriver.ChromeOptions()
-        options.headless = False
+        options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -40,13 +40,17 @@ class SeleniumTestCase(StaticLiveServerTestCase):
 
         self.driver.find_element(By.NAME, "Perfil").click()
 
-        self.driver.find_element(By.NAME, "recargar_saldo").click()
+        # self.driver.execute_script("document.body.style.zoom='50%'")
+        # self.driver.set_window_size(1920, 1080)
+        time.sleep(2)
+        self.driver.find_element(By.ID, "recargar_saldo").send_keys(Keys.ENTER)
 
         self.driver.find_element(By.ID, "id_cantidad").send_keys("30")
         self.driver.find_element(By.ID, "id_cantidad").send_keys(Keys.ENTER)
 
         self.driver.find_element(By.NAME, "submit").click()
-        
+
+        self.driver.set_window_size(1920, 1080)
         self.driver.find_element(By.ID, "email").send_keys("cliente@tonight.com")
         self.driver.find_element(By.ID, "email").send_keys(Keys.ENTER)
         time.sleep(2)
