@@ -1,3 +1,4 @@
+from unicodedata import name
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -38,13 +39,8 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password").send_keys("radiohead")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
 
-        self.driver.find_element(By.NAME, "Perfil").click()
-
-        # self.driver.execute_script("document.body.style.zoom='50%'")
-        # self.driver.set_window_size(1920, 1080)
-        time.sleep(2)
-        self.driver.find_element(By.ID, "recargar_saldo").send_keys(Keys.ENTER)
-
+        user = User.objects.get(username='thomy')
+        self.driver.get(f'{self.live_server_url}/cliente/' + str(user.id) +'/saldo')
         self.driver.find_element(By.ID, "id_cantidad").send_keys("30")
         self.driver.find_element(By.ID, "id_cantidad").send_keys(Keys.ENTER)
 
