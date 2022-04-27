@@ -627,7 +627,6 @@ def compra_directa(request, evento_id):
         cliente = Cliente.objects.get(user = o_user)
         evento = Evento.objects.get(id=evento_id)
         create_entrada(request,cliente,evento)
-        proyecto.notificaciones.send_notificacion(o_user.id, "Se ha comprado una entrada para " + evento.nombre)
         return redirect(ver_evento, evento_id=evento.id)
     else:
         return redirect('/')
