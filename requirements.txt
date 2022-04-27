@@ -12,3 +12,4 @@ django-phonenumber-field[phonenumbers]
 Babel
 django-localflavor
 geopy
+selenium
