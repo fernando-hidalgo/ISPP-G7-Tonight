@@ -67,7 +67,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
         message = self.driver.find_element_by_id('id_username').get_attribute('validationMessage')
         
 
-        assert "Completa este campo" in message
+        assert message != ''
 
     def test_crear_cliente_sin_mail(self):                    
         self.driver.get(f'{self.live_server_url}')
@@ -98,7 +98,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
             message = self.driver.find_element_by_id('id_password1').get_attribute('validationMessage')
             
 
-            assert "Completa este campo" in message
+            assert message != ''
 
     def test_crear_cliente_sin_password2(self):                    
             self.driver.get(f'{self.live_server_url}')
@@ -115,7 +115,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
             message = self.driver.find_element_by_id('id_password2').get_attribute('validationMessage')
             
 
-            assert "Completa este campo" in message
+            assert message != ''
 
     def test_crear_cliente_sin_tlf(self):                    
             self.driver.get(f'{self.live_server_url}')
@@ -132,7 +132,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
             message = self.driver.find_element_by_id('id_tlf_1').get_attribute('validationMessage')
             
 
-            assert "Completa este campo" in message
+            assert message != ''
 
     def test_crear_cliente_sin_imagen(self):                    
             self.driver.get(f'{self.live_server_url}')
@@ -148,7 +148,7 @@ class SeleniumTestCase(StaticLiveServerTestCase):
             message = self.driver.find_element_by_id('id_imagen').get_attribute('validationMessage')
             
 
-            assert "Selecciona un archivo" in message
+            assert message != ''
         
     def test_crear_cliente_email_repetido(self):                    
         self.driver.get(f'{self.live_server_url}')
