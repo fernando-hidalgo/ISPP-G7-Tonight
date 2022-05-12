@@ -81,6 +81,17 @@ WSGI_APPLICATION = 'tonight.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'toNight',
+        'USER': 'root',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+'''
+DATABASES = {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', 
         'NAME': 'tonight',
         'USER': 'root',
@@ -99,7 +110,7 @@ if os.environ.get('GITHUB_WORKFLOW'):
            'HOST': '127.0.0.1',
            'PORT': '5432',
         }
-    }
+    }'''
 db_from_env = dj_database_url.config(conn_max_age=600)
 DATABASES['default'].update(db_from_env)
 # Password validation
