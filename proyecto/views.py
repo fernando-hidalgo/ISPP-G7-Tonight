@@ -38,7 +38,6 @@ from django.urls import reverse
 from geopy.geocoders import Nominatim
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
@@ -105,7 +104,6 @@ def mapa_eventos(request):
     else:
         return redirect('/')
 
-@never_cache
 @login_required
 def QR(request, evento_id):
     #Solo los Clientes tienen acceso
@@ -836,7 +834,6 @@ def payment_canceled(request):
     return render(request, 'saldo_cancelado.html')
 
 class NotificacionesView(LoginRequiredMixin, View):
-    @never_cache
     def get(self, request):
         proyecto.notificaciones.set_read_notificaciones(request.user.id)
         notificaciones = proyecto.notificaciones.get_notificaciones(request.user.id)
