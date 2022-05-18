@@ -5,6 +5,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
 from proyecto.views import ClientProfile, EmpresaEdit, ClientEdit, InicioVista, VistaEditarEvento, ErrorVista, BusinnessProfile, Entradas, WelcomeVista, ClientCreate, EmpresaCreate, EmpleadoCreate, TerminosVista, NotificacionesView
 from django.conf.urls.static import static
+from django.views.decorators.cache import never_cache
 
 urlpatterns = [
     path('paypal/', include('paypal.standard.ipn.urls')),
@@ -40,7 +41,7 @@ urlpatterns = [
     
     #Accesible por Cliente, Empleado y Empresa
     path('eventos/<int:evento_id>', views.ver_evento),
-    path('notificaciones', NotificacionesView.as_view()),
+    path('notificaciones', never_cache(NotificacionesView.as_view())),
     
     #Accesible sin Login
     path('', WelcomeVista.as_view()),
