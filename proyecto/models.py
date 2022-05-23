@@ -58,6 +58,14 @@ class Entrada(models.Model):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='evento')
     hash = models.CharField(max_length=100, blank=True)
 
+    def get_time_to_start(self):
+        tdelta = self.evento.fecha - datetime.datetime.now()
+        fmt = "{days} días, {hours}:{minutes}:{seconds}"
+        d = {"days": tdelta.days}
+        d["hours"], rem = divmod(tdelta.seconds, 3600)
+        d["minutes"], d["seconds"] = divmod(rem, 60)
+        return fmt.format(**d)
+
 class Transaccion(models.Model):
     TYPE = (
         ('V', 'Vender'),
