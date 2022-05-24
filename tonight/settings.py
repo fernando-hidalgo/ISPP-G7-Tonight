@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'tonight.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-
+'''
 DATABASES = {
     
     'default': {
@@ -113,7 +113,7 @@ if os.environ.get('GITHUB_WORKFLOW'):
            'HOST': '127.0.0.1',
            'PORT': '5432',
         }
-    }'''
+    }
 db_from_env = dj_database_url.config(conn_max_age=600)
 DATABASES['default'].update(db_from_env)
 # Password validation
