@@ -90,7 +90,8 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3306',
     }
-}'''
+}
+'''
 
 DATABASES = {
     'default': {

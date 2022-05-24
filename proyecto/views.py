@@ -209,7 +209,7 @@ class ClientProfile(LoginRequiredMixin, View):
                     hayEntradas = Entrada.objects.filter(cliente=cliente).exists()
                     notificaciones = proyecto.notificaciones.count_unread_notificaciones(request.user.id)
                     if hayEntradas == True:
-                        entradas = Entrada.objects.filter(cliente=cliente)
+                        entradas = Entrada.objects.filter(cliente=cliente).exclude(estado='V')
                         context = {
                             'cliente': cliente,
                             'entradas': entradas,
@@ -837,7 +837,11 @@ class NotificacionesView(LoginRequiredMixin, View):
     def get(self, request):
         proyecto.notificaciones.set_read_notificaciones(request.user.id)
         notificaciones = proyecto.notificaciones.get_notificaciones(request.user.id)
-        return render(request,'notificaciones.html', {"notificaciones":notificaciones})
+        entradas = []
+        if Cliente.objects.filter(user=request.user.id).exists():
+            if Entrada.objects.filter(cliente=Cliente.objects.get(user=request.user.id)).exists():
+                entradas = Entrada.objects.filter(cliente=Cliente.objects.get(user=request.user.id), estado='A')
+        return render(request,'notificaciones.html', {"notificaciones":notificaciones, "entradas": entradas})
 
 @login_required    
 def borra_notificacion(request, notificacion_id):
